@@ -41,7 +41,7 @@
         </div>
     </header>
 
-    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
 
         <!-- Cabecera de la sección -->
         <header class="text-center mb-8">
@@ -292,18 +292,21 @@
         function generateProfitTable(totalInvestment, units) {
             const profitPercentages = [0.10, 0.25, 0.35, 0.50, 0.75, 1.0, 1.5, 2.0];
             let tableHTML = `<div class="overflow-x-auto"><table class="min-w-full bg-white results-table"><thead class="bg-gray-100"><tr>
-                <th class="font-semibold text-gray-600">Ganancia Obj.</th>
+                <th class="font-semibold text-gray-600">Ganancia Obj. (%)</th>
+                <th class="font-semibold text-gray-600">Ganancia ($)</th>
                 <th class="font-semibold text-gray-600">Total Venta</th>
                 <th class="font-semibold text-gray-600">Precio Obj. Contrato</th>
                 <th class="font-semibold text-gray-600">Valor Real Obj. Contrato</th>
             </tr></thead><tbody class="divide-y divide-gray-200">`;
             
             profitPercentages.forEach(p => {
+                const profitAmount = totalInvestment * p;
                 const targetTotal = totalInvestment * (1 + p);
                 const pricePerContract = targetTotal / units;
                 const realContractValue = pricePerContract * 100;
                 tableHTML += `<tr class="hover:bg-gray-50">
-                                <td class="text-green-600 font-medium">${(p * 100).toFixed(0)}%</td>
+                                <td class="text-blue-600 font-medium">${(p * 100).toFixed(0)}%</td>
+                                <td class="text-green-600 font-semibold">${profitAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                                 <td>${targetTotal.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                                 <td class="font-mono">${pricePerContract.toFixed(4)}</td>
                                 <td class="font-mono font-semibold">${realContractValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
@@ -338,7 +341,7 @@
                         <p class="text-lg font-semibold text-gray-700">(= ${(targetSalePricePerContract * 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} / contrato)</p>
                     </div>
                     <p class="text-sm text-gray-500 mt-2">Vende tus contratos a este precio para alcanzar tu objetivo.</p>
-                    <p class="text-md font-semibold text-green-600 mt-2">Ganancia Total Estimada: ${totalProfit.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</p>
+                    <p class="text-md font-semibold text-green-600 mt-2">Ganancia Total Estimada: ${totalProfit.toLocaleString('en-US', { style: 'currency', currency: 'USD' })} <span class="text-sm text-gray-500 font-normal">(${(inputs.total).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} x ${(inputs.targetProfitPercentage * 100).toFixed(0)}%)</span></p>
                 </div>
             `;
 
