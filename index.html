@@ -57,7 +57,13 @@
                 <!-- Formulario de entrada de datos -->
                 <form id="optionsForm" class="space-y-4">
                     <div>
-                        <label for="tipo" class="block text-sm font-medium text-gray-700">Tipo de opción</label>
+                        <div class="flex items-center space-x-2">
+                            <label for="tipo" class="block text-sm font-medium text-gray-700">Tipo de opción</label>
+                            <div class="group relative flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>Elige 'Call' si esperas que el precio del activo suba, o 'Put' si esperas que baje.</div>
+                            </div>
+                        </div>
                         <select id="tipo" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
                             <option value="call">Call (Compra)</option>
                             <option value="put">Put (Venta)</option>
@@ -66,46 +72,67 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label for="total" class="block text-sm font-medium text-gray-700">Inversión Total (USD)</label>
+                            <div class="flex items-center space-x-2">
+                                <label for="total" class="block text-sm font-medium text-gray-700">Inversión Total (USD)</label>
+                                <div class="group relative flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El coste total de tu operación, incluyendo el precio de todos los contratos más las comisiones del bróker.</div>
+                                </div>
+                            </div>
                             <input type="number" id="total" value="362.12" step="0.01" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
                         </div>
                         <div>
-                            <label for="contracts" class="block text-sm font-medium text-gray-700">Nº de Contratos</label>
+                            <div class="flex items-center space-x-2">
+                                <label for="contracts" class="block text-sm font-medium text-gray-700">Nº de Contratos</label>
+                                <div class="group relative flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>La cantidad de contratos de opciones que vas a comprar.</div>
+                                </div>
+                            </div>
                             <input type="number" id="contracts" value="40" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
                         </div>
                     </div>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label for="strike" class="block text-sm font-medium text-gray-700">Precio Strike</label>
+                            <div class="flex items-center space-x-2">
+                                <label for="strike" class="block text-sm font-medium text-gray-700">Precio Strike</label>
+                                <div class="group relative flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El precio al que puedes comprar (Call) o vender (Put) el activo subyacente al vencimiento del contrato.</div>
+                                </div>
+                            </div>
                             <input type="number" id="strike" value="35.5" step="0.01" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
                         </div>
                          <div>
-                            <label for="delta" class="block text-sm font-medium text-gray-700">Delta (ej: 0.039)</label>
-                            <input type="number" id="delta" value="0.039" step="0.001" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                    </div>
-
-                    <!-- SECCIÓN PARA COMPARAR PRECIOS CON VALOR REAL -->
-                    <div class="space-y-4 pt-4 border-t">
-                        <div>
-                            <label for="premium" class="block text-sm font-medium text-gray-700">Prima Pagada / Contrato</label>
+                             <div class="flex items-center space-x-2">
+                                <label for="premium" class="block text-sm font-medium text-gray-700">Prima Pagada / Contrato</label>
+                                <div class="group relative flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El precio que pagas por un solo contrato de opción (sin multiplicar por 100).</div>
+                                </div>
+                            </div>
                             <div class="mt-1 flex items-center space-x-3">
                                 <input type="number" id="premium" value="0.07" step="0.01" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
                                 <span id="premiumRealValue" class="w-28 text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
                             </div>
                         </div>
-                         <!-- NUEVA SECCIÓN PARA RANGO DE PRECIO ÓPTIMO -->
-                        <div class="pt-2">
+                    </div>
+
+                    <!-- SECCIÓN PARA COMPARAR PRECIOS Y OBJETIVOS -->
+                    <div class="pt-4 border-t">
+                         <div class="pt-2">
                              <div class="flex justify-between items-center mb-2">
-                                <label class="block text-sm font-medium text-gray-700">Rango de Precio Óptimo</label>
-                                <!-- BOTÓN PARA VISUALIZAR RANGOS -->
-                                <a href="https://docs.google.com/spreadsheets/d/1JH-nYSubRs6eznGMjl-gjCE3P6NEo_utrI2zPDci1LM/edit?gid=0#gid=0" target="_blank" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <div class="flex items-center space-x-2">
+                                    <label class="block text-sm font-medium text-gray-700">Rango de Precio Óptimo</label>
+                                    <div class="group relative flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El rango de precios (mínimo y máximo) que consideras aceptable para la prima del contrato, según tu análisis.</div>
+                                    </div>
+                                </div>
+                                <a href="https://docs.google.com/spreadsheets/d/1B-c3cK2C_Nfn3m2jH_3X_Y_Z/edit#gid=0" target="_blank" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                     Ver Listado
-                                    <svg class="ml-2 -mr-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-                                        <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-                                    </svg>
+                                    <svg class="ml-2 -mr-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" /><path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" /></svg>
                                 </a>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -125,15 +152,25 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                     <div class="grid grid-cols-1 sm:grid-cols-1 gap-4">
-                        <div>
-                            <label for="targetPrice" class="block text-sm font-medium text-gray-700">Precio Objetivo Contrato</label>
-                             <div class="mt-1 flex items-center space-x-3">
-                                <input type="number" id="targetPrice" value="0.12" step="0.01" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
-                                <span id="targetPriceRealValue" class="w-28 text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
+                        <!-- NUEVO DROPDOWN PARA OBJETIVO DE GANANCIA -->
+                        <div class="pt-4">
+                            <div class="flex items-center space-x-2">
+                                <label for="targetProfitPercentage" class="block text-sm font-medium text-gray-700">Seleccionar Objetivo de Ganancia</label>
+                                <div class="group relative flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>Elige el porcentaje de ganancia que deseas obtener sobre tu inversión total para calcular el precio de venta necesario.</div>
+                                </div>
                             </div>
+                            <select id="targetProfitPercentage" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="0.10">10%</option>
+                                <option value="0.25">25%</option>
+                                <option value="0.35" selected>35%</option>
+                                <option value="0.50">50%</option>
+                                <option value="0.75">75%</option>
+                                <option value="1.0">100%</option>
+                                <option value="1.5">150%</option>
+                                <option value="2.0">200%</option>
+                            </select>
                         </div>
                     </div>
 
@@ -170,7 +207,7 @@
         }
 
         function setupRealtimeUpdates() {
-            const fieldsToTrack = ['premium', 'optimalPriceMin', 'optimalPriceMax', 'targetPrice'];
+            const fieldsToTrack = ['premium', 'optimalPriceMin', 'optimalPriceMax'];
             fieldsToTrack.forEach(field => {
                 const input = document.getElementById(field);
                 if (input) {
@@ -188,20 +225,23 @@
                 tipo: document.getElementById('tipo').value,
                 total: parseFloat(document.getElementById('total').value),
                 contracts: parseInt(document.getElementById('contracts').value),
-                delta: parseFloat(document.getElementById('delta').value),
                 strike: parseFloat(document.getElementById('strike').value),
                 premium: parseFloat(document.getElementById('premium').value),
-                targetPrice: parseFloat(document.getElementById('targetPrice').value),
                 optimalPriceMin: parseFloat(document.getElementById('optimalPriceMin').value),
-                optimalPriceMax: parseFloat(document.getElementById('optimalPriceMax').value)
+                optimalPriceMax: parseFloat(document.getElementById('optimalPriceMax').value),
+                targetProfitPercentage: parseFloat(document.getElementById('targetProfitPercentage').value)
             };
 
             const errorDiv = document.getElementById('error-message');
             errorDiv.innerHTML = ''; 
 
-            const requiredFields = ['total', 'contracts', 'delta', 'strike', 'premium', 'targetPrice'];
+            const requiredFields = ['total', 'contracts', 'strike', 'premium', 'targetProfitPercentage'];
             for (const key of requiredFields) {
-                if (isNaN(inputs[key]) || inputs[key] <= 0) {
+                if (isNaN(inputs[key])) {
+                    showError(`El valor de '${key}' es inválido.`);
+                    return;
+                }
+                 if (key !== 'targetProfitPercentage' && inputs[key] <= 0) {
                     showError(`El valor de '${key}' debe ser un número positivo.`);
                     return;
                 }
@@ -210,19 +250,6 @@
             const units = inputs.contracts * 100;
             const breakevenPrice = inputs.total / units;
 
-            let underlyingTargetPrice = "N/A";
-            const priceChangeNeeded = inputs.targetPrice - inputs.premium;
-
-            if (priceChangeNeeded > 0) {
-                 if (inputs.tipo === 'call') {
-                    underlyingTargetPrice = inputs.strike + (priceChangeNeeded / inputs.delta);
-                } else {
-                    underlyingTargetPrice = inputs.strike - (priceChangeNeeded / inputs.delta);
-                }
-            } else {
-                 underlyingTargetPrice = "El precio objetivo es menor o igual a la prima pagada."
-            }
-            
             // LÓGICA DE VALIDACIÓN ESTRICTA
             let priceRecommendation = { text: '', color: 'gray' };
             const { premium, optimalPriceMin, optimalPriceMax } = inputs;
@@ -241,9 +268,12 @@
                 }
             }
 
+            // CÁLCULO DEL PRECIO DE VENTA OBJETIVO
+            const targetSaleTotal = inputs.total * (1 + inputs.targetProfitPercentage);
+            const targetSalePricePerContract = targetSaleTotal / units;
 
             const profitTableHTML = generateProfitTable(inputs.total, units);
-            displayResults(breakevenPrice, underlyingTargetPrice, profitTableHTML, inputs, priceRecommendation);
+            displayResults(breakevenPrice, profitTableHTML, inputs, priceRecommendation, targetSalePricePerContract);
         }
         
         // --- 3. Funciones para mostrar resultados y errores ---
@@ -263,8 +293,8 @@
             let tableHTML = `<div class="overflow-x-auto"><table class="min-w-full bg-white results-table"><thead class="bg-gray-100"><tr>
                 <th class="font-semibold text-gray-600">Ganancia Obj.</th>
                 <th class="font-semibold text-gray-600">Total Venta</th>
-                <th class="font-semibold text-gray-600">Precio/Contrato</th>
-                <th class="font-semibold text-gray-600">Valor Real Contrato</th>
+                <th class="font-semibold text-gray-600">Precio Obj. Contrato</th>
+                <th class="font-semibold text-gray-600">Valor Real Obj. Contrato</th>
             </tr></thead><tbody class="divide-y divide-gray-200">`;
             
             profitPercentages.forEach(p => {
@@ -283,13 +313,9 @@
             return tableHTML;
         }
 
-        function displayResults(breakevenPrice, underlyingTargetPrice, profitTableHTML, inputs, priceRecommendation) {
+        function displayResults(breakevenPrice, profitTableHTML, inputs, priceRecommendation, targetSalePricePerContract) {
             const resultContainer = document.getElementById('result-container');
             const resultDiv = document.getElementById('result');
-            
-            const formattedUnderlyingPrice = typeof underlyingTargetPrice === 'number' 
-                ? underlyingTargetPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-                : underlyingTargetPrice;
             
             let recommendationHTML = '';
             if (priceRecommendation.text) {
@@ -301,9 +327,22 @@
                 };
                 recommendationHTML = `<div class="p-4 rounded-lg border-l-4 ${colorClasses[priceRecommendation.color]}"><h3 class="font-semibold text-lg">Validación de Precio vs. Rango Óptimo</h3><p class="mt-1">${priceRecommendation.text}</p></div>`;
             }
+            
+            // HTML PARA LA NUEVA TARJETA DE PRECIO DE VENTA OBJETIVO
+            const targetSalePriceHTML = `
+                <div class="bg-indigo-50 p-4 rounded-lg border-l-4 border-indigo-500">
+                    <h3 class="font-semibold text-gray-800">Precio de Venta para Ganancia del ${(inputs.targetProfitPercentage * 100).toFixed(0)}%</h3>
+                    <div class="flex items-baseline space-x-4 mt-1">
+                        <p class="text-2xl font-bold text-indigo-600">${targetSalePricePerContract.toFixed(4)} USD</p>
+                        <p class="text-lg font-semibold text-gray-700">(= ${(targetSalePricePerContract * 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} / contrato)</p>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-1">Vende tus contratos a este precio para alcanzar tu objetivo.</p>
+                </div>
+            `;
 
             resultDiv.innerHTML = `
                 ${recommendationHTML}
+                ${targetSalePriceHTML}
 
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <h3 class="font-semibold text-gray-800">Punto de Equilibrio (Break-Even)</h3>
@@ -314,16 +353,8 @@
                     <p class="text-sm text-gray-500 mt-1">Precio mínimo por contrato para no tener pérdidas.</p>
                 </div>
 
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-gray-800">Precio Objetivo del Subyacente</h3>
-                    <p class="text-2xl font-bold text-indigo-600 mt-1">${formattedUnderlyingPrice}</p>
-                    <p class="text-sm text-gray-500 mt-1">
-                        Precio estimado que el activo subyacente (${inputs.tipo.toUpperCase()}) debe alcanzar para que su contrato valga ${inputs.targetPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}.
-                    </p>
-                </div>
-
                 <div>
-                    <h3 class="text-xl font-semibold mb-3">Tabla de Objetivos de Ganancia</h3>
+                    <h3 class="text-xl font-semibold mb-3">Tabla de Referencia de Ganancias</h3>
                     ${profitTableHTML}
                 </div>
             `;
