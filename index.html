@@ -364,7 +364,7 @@
                         <p class="text-lg font-semibold text-gray-700">(= ${(targetSalePricePerContract * 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} / contrato)</p>
                     </div>
                     <p class="text-sm text-gray-500 mt-2">Vende tus contratos a este precio para alcanzar tu objetivo.</p>
-                    <p class="text-md font-semibold text-green-600 mt-2">Ganancia Total Estimada: ${totalProfit.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</p>
+                    <p class="text-md font-semibold text-green-600 mt-2">Ganancia Total Estimada: ${totalProfit.toLocaleString('en-US', { style: 'currency', currency: 'USD' })} <span class="text-sm text-gray-500 font-normal">(${(totalInvestment).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} x ${(inputs.targetProfitPercentage * 100).toFixed(0)}%)</span></p>
                 </div>
             `;
 
