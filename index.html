@@ -190,6 +190,14 @@
                  <div id="error-message" class="mt-4 text-center"></div>
             </div>
         </div>
+
+        <!-- NUEVA SECCIÓN PARA LA TABLA DE REFERENCIA -->
+        <div id="table-section" class="mt-8 bg-white p-6 rounded-2xl shadow-lg hidden">
+            <h2 class="text-2xl font-semibold mb-3">Tabla de Referencia de Ganancias</h2>
+            <div id="table-container">
+                <!-- La tabla se insertará aquí -->
+            </div>
+        </div>
     </div>
 
     <script>
@@ -323,6 +331,8 @@
         function displayResults(breakevenPrice, profitTableHTML, inputs, priceRecommendation, targetSalePricePerContract, totalProfit, totalInvestment, costOfContracts) {
             const resultContainer = document.getElementById('result-container');
             const resultDiv = document.getElementById('result');
+            const tableContainer = document.getElementById('table-container');
+            const tableSection = document.getElementById('table-section');
             
             let recommendationHTML = '';
             if (priceRecommendation.text) {
@@ -371,14 +381,12 @@
                     </div>
                     <p class="text-sm text-gray-500 mt-1">Precio mínimo por contrato para no tener pérdidas.</p>
                 </div>
-
-                <div>
-                    <h3 class="text-xl font-semibold mb-3">Tabla de Referencia de Ganancias</h3>
-                    ${profitTableHTML}
-                </div>
             `;
+
+            tableContainer.innerHTML = profitTableHTML;
             
             resultContainer.classList.remove('hidden');
+            tableSection.classList.remove('hidden');
         }
         
         // --- 4. Inicialización ---
