@@ -268,12 +268,13 @@
                 }
             }
 
-            // CÁLCULO DEL PRECIO DE VENTA OBJETIVO
+            // CÁLCULO DEL PRECIO DE VENTA OBJETIVO Y GANANCIA TOTAL
             const targetSaleTotal = inputs.total * (1 + inputs.targetProfitPercentage);
             const targetSalePricePerContract = targetSaleTotal / units;
+            const totalProfit = inputs.total * inputs.targetProfitPercentage;
 
             const profitTableHTML = generateProfitTable(inputs.total, units);
-            displayResults(breakevenPrice, profitTableHTML, inputs, priceRecommendation, targetSalePricePerContract);
+            displayResults(breakevenPrice, profitTableHTML, inputs, priceRecommendation, targetSalePricePerContract, totalProfit);
         }
         
         // --- 3. Funciones para mostrar resultados y errores ---
@@ -313,7 +314,7 @@
             return tableHTML;
         }
 
-        function displayResults(breakevenPrice, profitTableHTML, inputs, priceRecommendation, targetSalePricePerContract) {
+        function displayResults(breakevenPrice, profitTableHTML, inputs, priceRecommendation, targetSalePricePerContract, totalProfit) {
             const resultContainer = document.getElementById('result-container');
             const resultDiv = document.getElementById('result');
             
@@ -336,7 +337,8 @@
                         <p class="text-2xl font-bold text-indigo-600">${targetSalePricePerContract.toFixed(4)} USD</p>
                         <p class="text-lg font-semibold text-gray-700">(= ${(targetSalePricePerContract * 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} / contrato)</p>
                     </div>
-                    <p class="text-sm text-gray-500 mt-1">Vende tus contratos a este precio para alcanzar tu objetivo.</p>
+                    <p class="text-sm text-gray-500 mt-2">Vende tus contratos a este precio para alcanzar tu objetivo.</p>
+                    <p class="text-md font-semibold text-green-600 mt-2">Ganancia Total Estimada: ${totalProfit.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</p>
                 </div>
             `;
 
