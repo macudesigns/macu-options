@@ -564,12 +564,15 @@
 
             // --- FRED API Calls ---
             const fredSeries = { unemployment: 'UNRATE', inflation: 'CPIAUCSL_PC1' };
-            const proxyUrl = 'https://cors-proxy.fringe.workers.dev/';
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
             const fredBaseUrl = `https://api.stlouisfed.org/fred/series/observations`;
             const fredParams = `&api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=1`;
             
-            const unemploymentUrl = `${proxyUrl}${fredBaseUrl}?series_id=${fredSeries.unemployment}${fredParams}`;
-            const inflationUrl = `${proxyUrl}${fredBaseUrl}?series_id=${fredSeries.inflation}${fredParams}`;
+            const unemploymentFredUrl = `${fredBaseUrl}?series_id=${fredSeries.unemployment}${fredParams}`;
+            const inflationFredUrl = `${fredBaseUrl}?series_id=${fredSeries.inflation}${fredParams}`;
+
+            const unemploymentUrl = `${proxyUrl}${encodeURIComponent(unemploymentFredUrl)}`;
+            const inflationUrl = `${proxyUrl}${encodeURIComponent(inflationFredUrl)}`;
 
             // --- Finnhub API Calls ---
             const today = new Date();
