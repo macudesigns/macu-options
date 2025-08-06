@@ -111,9 +111,9 @@
                                             <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El precio que pagas por un solo contrato de opción (sin multiplicar por 100).</div>
                                         </div>
                                     </div>
-                                    <div class="mt-1 flex items-center space-x-3">
+                                    <div class="mt-1 flex flex-col sm:flex-row items-stretch sm:items-center sm:space-x-3">
                                         <input type="number" id="premium" value="0.07" step="0.01" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
-                                        <span id="premiumRealValue" class="w-28 text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
+                                        <span id="premiumRealValue" class="w-full mt-2 sm:mt-0 sm:w-28 text-center sm:text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
                                     </div>
                                 </div>
                             </div>
@@ -157,16 +157,16 @@
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
                                             <label for="optimalPriceMin" class="block text-xs text-gray-500">Mínimo</label>
-                                            <div class="mt-1 flex items-center space-x-3">
+                                            <div class="mt-1 flex flex-col sm:flex-row items-stretch sm:items-center sm:space-x-3">
                                                 <input type="number" id="optimalPriceMin" value="0.08" step="0.01" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Opcional">
-                                                <span id="optimalPriceMinRealValue" class="w-28 text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
+                                                <span id="optimalPriceMinRealValue" class="w-full mt-2 sm:mt-0 sm:w-28 text-center sm:text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
                                             </div>
                                         </div>
                                         <div>
                                             <label for="optimalPriceMax" class="block text-xs text-gray-500">Máximo</label>
-                                            <div class="mt-1 flex items-center space-x-3">
+                                            <div class="mt-1 flex flex-col sm:flex-row items-stretch sm:items-center sm:space-x-3">
                                                 <input type="number" id="optimalPriceMax" value="0.11" step="0.01" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Opcional">
-                                                <span id="optimalPriceMaxRealValue" class="w-28 text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
+                                                <span id="optimalPriceMaxRealValue" class="w-full mt-2 sm:mt-0 sm:w-28 text-center sm:text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
                                             </div>
                                         </div>
                                     </div>
@@ -556,7 +556,7 @@
         // --- LÓGICA DE NOTICIAS (APIs) ---
         
         const FRED_API_KEY = 'daef8968f17b991affd5805fa538819f';
-        const FINNHUB_API_KEY = 'YOUR_FINNHUB_API_KEY'; // <-- PEGA TU CLAVE DE FINNHUB AQUÍ
+        const FINNHUB_API_KEY = 'd29gg79r01qhoenc1g10d29gg79r01qhoenc1g1g';
 
         async function fetchAllEconomicData() {
             const apiErrorDiv = document.getElementById('api-error');
