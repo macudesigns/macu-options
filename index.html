@@ -30,6 +30,13 @@
             padding: 0.75rem 1rem;
             text-align: left;
         }
+        /* Estilos para las pestañas */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -43,166 +50,330 @@
 
     <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
 
-        <!-- Cabecera de la sección -->
-        <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Analizador de Opciones de Trading</h1>
-            <p class="mt-2 text-md text-gray-600">Evalúa si una entrada en opciones es potencialmente rentable.</p>
-        </header>
+        <!-- NAVEGACIÓN DE PESTAÑAS -->
+        <div class="mb-8 border-b border-gray-200">
+            <nav class="-mb-px flex space-x-6" aria-label="Tabs" id="tabs-container">
+                <button data-tab-target="#analisis" class="tab active-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-indigo-600 border-indigo-500">
+                    Análisis
+                </button>
+                <button data-tab-target="#noticias" class="tab inactive-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300">
+                    Noticias
+                </button>
+                <button data-tab-target="#checklist" class="tab inactive-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300">
+                    Checklist
+                </button>
+            </nav>
+        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Columna del formulario -->
-            <div class="bg-white p-6 rounded-2xl shadow-lg">
-                <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Parámetros de la Operación</h2>
-
-                <!-- Formulario de entrada de datos -->
-                <form id="optionsForm" class="space-y-4">
-                    <div>
-                        <div class="flex items-center space-x-2">
-                            <label for="tipo" class="block text-sm font-medium text-gray-700">Tipo de opción</label>
-                            <div class="group relative flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>Elige 'Call' si esperas que el precio del activo suba, o 'Put' si esperas que baje.</div>
-                            </div>
-                        </div>
-                        <select id="tipo" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="call">Call (Compra)</option>
-                            <option value="put">Put (Venta)</option>
-                        </select>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <label for="contracts" class="block text-sm font-medium text-gray-700">Nº de Contratos</label>
-                                <div class="group relative flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>La cantidad de contratos de opciones que vas a comprar.</div>
-                                </div>
-                            </div>
-                            <input type="number" id="contracts" value="40" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        <div>
-                             <div class="flex items-center space-x-2">
-                                <label for="premium" class="block text-sm font-medium text-gray-700">Prima Pagada / Contrato</label>
-                                <div class="group relative flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El precio que pagas por un solo contrato de opción (sin multiplicar por 100).</div>
-                                </div>
-                            </div>
-                            <div class="mt-1 flex items-center space-x-3">
-                                <input type="number" id="premium" value="0.07" step="0.01" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
-                                <span id="premiumRealValue" class="w-28 text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <label for="strike" class="block text-sm font-medium text-gray-700">Precio Strike</label>
-                                <div class="group relative flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El precio al que puedes comprar (Call) o vender (Put) el activo subyacente al vencimiento del contrato.</div>
-                                </div>
-                            </div>
-                            <input type="number" id="strike" value="35.5" step="0.01" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        <div>
-                             <div class="flex items-center space-x-2">
-                                <label for="commissions" class="block text-sm font-medium text-gray-700">Comisiones (Total, USD)</label>
-                                <div class="group relative flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>Introduce el coste total de las comisiones y otros gastos del bróker para esta operación.</div>
-                                </div>
-                            </div>
-                            <input type="number" id="commissions" value="0.00" step="0.01" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Opcional">
-                        </div>
-                    </div>
-
-                    <!-- SECCIÓN PARA COMPARAR PRECIOS Y OBJETIVOS -->
-                    <div class="pt-4 border-t">
-                         <div class="pt-2">
-                             <div class="flex justify-between items-center mb-2">
+        <!-- CONTENIDO DE LAS PESTAÑAS -->
+        <main>
+            <!-- PESTAÑA DE ANÁLISIS -->
+            <div id="analisis" class="tab-content active">
+                <header class="text-center mb-8">
+                    <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Analizador de Opciones de Trading</h1>
+                    <p class="mt-2 text-md text-gray-600">Evalúa si una entrada en opciones es potencialmente rentable.</p>
+                </header>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Columna del formulario -->
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Parámetros de la Operación</h2>
+                        <form id="optionsForm" class="space-y-4">
+                            <!-- Contenido del formulario... -->
+                             <div>
                                 <div class="flex items-center space-x-2">
-                                    <label class="block text-sm font-medium text-gray-700">Rango de Precio Óptimo</label>
+                                    <label for="tipo" class="block text-sm font-medium text-gray-700">Tipo de opción</label>
                                     <div class="group relative flex items-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El rango de precios (mínimo y máximo) que consideras aceptable para la prima del contrato, según tu análisis.</div>
+                                        <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>Elige 'Call' si esperas que el precio del activo suba, o 'Put' si esperas que baje.</div>
                                     </div>
                                 </div>
-                                <a href="https://docs.google.com/spreadsheets/d/1JH-nYSubRs6eznGMjl-gjCE3P6NEo_utrI2zPDci1LM/edit?gid=0#gid=0" target="_blank" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    Ver Listado
-                                    <svg class="ml-2 -mr-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" /><path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" /></svg>
-                                </a>
+                                <select id="tipo" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="call">Call (Compra)</option>
+                                    <option value="put">Put (Venta)</option>
+                                </select>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label for="optimalPriceMin" class="block text-xs text-gray-500">Mínimo</label>
-                                    <div class="mt-1 flex items-center space-x-3">
-                                        <input type="number" id="optimalPriceMin" value="0.08" step="0.01" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Opcional">
-                                        <span id="optimalPriceMinRealValue" class="w-28 text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
+                                    <div class="flex items-center space-x-2">
+                                        <label for="contracts" class="block text-sm font-medium text-gray-700">Nº de Contratos</label>
+                                        <div class="group relative flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>La cantidad de contratos de opciones que vas a comprar.</div>
+                                        </div>
                                     </div>
+                                    <input type="number" id="contracts" value="40" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                                 <div>
-                                    <label for="optimalPriceMax" class="block text-xs text-gray-500">Máximo</label>
+                                     <div class="flex items-center space-x-2">
+                                        <label for="premium" class="block text-sm font-medium text-gray-700">Prima Pagada / Contrato</label>
+                                        <div class="group relative flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El precio que pagas por un solo contrato de opción (sin multiplicar por 100).</div>
+                                        </div>
+                                    </div>
                                     <div class="mt-1 flex items-center space-x-3">
-                                        <input type="number" id="optimalPriceMax" value="0.11" step="0.01" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Opcional">
-                                        <span id="optimalPriceMaxRealValue" class="w-28 text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
+                                        <input type="number" id="premium" value="0.07" step="0.01" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <span id="premiumRealValue" class="w-28 text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <!-- NUEVO DROPDOWN PARA OBJETIVO DE GANANCIA -->
-                        <div class="pt-4">
-                            <div class="flex items-center space-x-2">
-                                <label for="targetProfitPercentage" class="block text-sm font-medium text-gray-700">Seleccionar Objetivo de Ganancia</label>
-                                <div class="group relative flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>Elige el porcentaje de ganancia que deseas obtener sobre tu inversión total para calcular el precio de venta necesario.</div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <label for="strike" class="block text-sm font-medium text-gray-700">Precio Strike</label>
+                                        <div class="group relative flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El precio al que puedes comprar (Call) o vender (Put) el activo subyacente al vencimiento del contrato.</div>
+                                        </div>
+                                    </div>
+                                    <input type="number" id="strike" value="35.5" step="0.01" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                                <div>
+                                     <div class="flex items-center space-x-2">
+                                        <label for="commissions" class="block text-sm font-medium text-gray-700">Comisiones (Total, USD)</label>
+                                        <div class="group relative flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>Introduce el coste total de las comisiones y otros gastos del bróker para esta operación.</div>
+                                        </div>
+                                    </div>
+                                    <input type="number" id="commissions" value="0.00" step="0.01" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Opcional">
                                 </div>
                             </div>
-                            <select id="targetProfitPercentage" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="0.10">10%</option>
-                                <option value="0.25">25%</option>
-                                <option value="0.35" selected>35%</option>
-                                <option value="0.50">50%</option>
-                                <option value="0.75">75%</option>
-                                <option value="1.0">100%</option>
-                                <option value="1.5">150%</option>
-                                <option value="2.0">200%</option>
-                            </select>
+                            <div class="pt-4 border-t">
+                                 <div class="pt-2">
+                                     <div class="flex justify-between items-center mb-2">
+                                        <div class="flex items-center space-x-2">
+                                            <label class="block text-sm font-medium text-gray-700">Rango de Precio Óptimo</label>
+                                            <div class="group relative flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El rango de precios (mínimo y máximo) que consideras aceptable para la prima del contrato, según tu análisis.</div>
+                                            </div>
+                                        </div>
+                                        <a href="https://docs.google.com/spreadsheets/d/1JH-nYSubRs6eznGMjl-gjCE3P6NEo_utrI2zPDci1LM/edit?gid=0#gid=0" target="_blank" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                            Ver Listado
+                                            <svg class="ml-2 -mr-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" /><path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" /></svg>
+                                        </a>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="optimalPriceMin" class="block text-xs text-gray-500">Mínimo</label>
+                                            <div class="mt-1 flex items-center space-x-3">
+                                                <input type="number" id="optimalPriceMin" value="0.08" step="0.01" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Opcional">
+                                                <span id="optimalPriceMinRealValue" class="w-28 text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="optimalPriceMax" class="block text-xs text-gray-500">Máximo</label>
+                                            <div class="mt-1 flex items-center space-x-3">
+                                                <input type="number" id="optimalPriceMax" value="0.11" step="0.01" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Opcional">
+                                                <span id="optimalPriceMaxRealValue" class="w-28 text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="pt-4">
+                                    <div class="flex items-center space-x-2">
+                                        <label for="targetProfitPercentage" class="block text-sm font-medium text-gray-700">Seleccionar Objetivo de Ganancia</label>
+                                        <div class="group relative flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>Elige el porcentaje de ganancia que deseas obtener sobre tu inversión total para calcular el precio de venta necesario.</div>
+                                        </div>
+                                    </div>
+                                    <select id="targetProfitPercentage" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="0.10">10%</option>
+                                        <option value="0.25">25%</option>
+                                        <option value="0.35" selected>35%</option>
+                                        <option value="0.50">50%</option>
+                                        <option value="0.75">75%</option>
+                                        <option value="1.0">100%</option>
+                                        <option value="1.5">150%</option>
+                                        <option value="2.0">200%</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="button" onclick="calcular()" class="w-full mt-6 bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
+                                Analizar Operación
+                            </button>
+                        </form>
+                    </div>
+                    <!-- Columna de resultados -->
+                    <div id="result-container" class="bg-white p-6 rounded-2xl shadow-lg hidden">
+                        <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Análisis de Resultados</h2>
+                        <div id="result" class="space-y-6">
+                            <!-- Los resultados se insertarán aquí -->
+                        </div>
+                         <div id="error-message" class="mt-4 text-center"></div>
+                    </div>
+                </div>
+                <!-- SECCIÓN PARA LA TABLA DE REFERENCIA -->
+                <div id="table-section" class="mt-8 bg-white p-6 rounded-2xl shadow-lg hidden">
+                    <h2 class="text-2xl font-semibold mb-3">Tabla de Referencia de Ganancias</h2>
+                    <div id="table-container">
+                        <!-- La tabla se insertará aquí -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA DE NOTICIAS -->
+            <div id="noticias" class="tab-content">
+                <header class="text-center mb-8">
+                    <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Indicadores Económicos y Herramientas</h1>
+                    <p class="mt-2 text-md text-gray-600">Datos económicos de EE.UU. y enlaces de interés.</p>
+                </header>
+                <div class="bg-white p-6 rounded-2xl shadow-lg">
+                    <!-- Indicadores -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 p-5 rounded-xl">
+                            <h3 class="font-semibold text-gray-800">Tasa de Interés (Fondos Federales)</h3>
+                            <p id="interest-rate" class="text-3xl font-bold text-indigo-600 mt-2">Cargando...</p>
+                            <p id="interest-rate-date" class="text-sm text-gray-500 mt-1"></p>
+                        </div>
+                        <div class="bg-gray-50 p-5 rounded-xl">
+                            <h3 class="font-semibold text-gray-800">Tasa de Desempleo</h3>
+                            <p id="unemployment-rate" class="text-3xl font-bold text-indigo-600 mt-2">Cargando...</p>
+                            <p id="unemployment-rate-date" class="text-sm text-gray-500 mt-1"></p>
+                        </div>
+                        <div class="bg-gray-50 p-5 rounded-xl">
+                            <h3 class="font-semibold text-gray-800">Inflación (IPC Anual)</h3>
+                            <p id="inflation-rate" class="text-3xl font-bold text-indigo-600 mt-2">Cargando...</p>
+                            <p id="inflation-rate-date" class="text-sm text-gray-500 mt-1"></p>
+                        </div>
+                        <div class="bg-gray-50 p-5 rounded-xl">
+                            <h3 class="font-semibold text-gray-800">Próxima Reunión del FOMC</h3>
+                            <p id="fomc-date" class="text-3xl font-bold text-indigo-600 mt-2">Cargando...</p>
+                            <p class="text-sm text-gray-500 mt-1">Decisión sobre tasas de interés.</p>
                         </div>
                     </div>
-
-                    <!-- Botón de cálculo -->
-                    <button type="button" onclick="calcular()" class="w-full mt-6 bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
-                        Analizar Operación
-                    </button>
-                </form>
-            </div>
-
-            <!-- Columna de resultados -->
-            <div id="result-container" class="bg-white p-6 rounded-2xl shadow-lg hidden">
-                <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Análisis de Resultados</h2>
-                <div id="result" class="space-y-6">
-                    <!-- Los resultados se insertarán aquí -->
+                    <div id="api-error" class="hidden mt-6 text-center text-sm text-red-600 bg-red-50 p-4 rounded-lg"></div>
+                    <div class="mt-6 text-center text-xs text-gray-500">
+                        <p>Datos económicos proporcionados por FRED y Finnhub.</p>
+                    </div>
                 </div>
-                 <div id="error-message" class="mt-4 text-center"></div>
-            </div>
-        </div>
 
-        <!-- NUEVA SECCIÓN PARA LA TABLA DE REFERENCIA -->
-        <div id="table-section" class="mt-8 bg-white p-6 rounded-2xl shadow-lg hidden">
-            <h2 class="text-2xl font-semibold mb-3">Tabla de Referencia de Ganancias</h2>
-            <div id="table-container">
-                <!-- La tabla se insertará aquí -->
+                <!-- Enlaces de Interés -->
+                <div class="mt-8 bg-white p-6 rounded-2xl shadow-lg">
+                    <h2 class="text-2xl font-semibold mb-4">Enlaces de Interés</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        <a href="https://finviz.com/" target="_blank" class="flex items-center justify-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">Finviz</a>
+                        <a href="https://www.marketwatch.com/" target="_blank" class="flex items-center justify-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">MarketWatch</a>
+                        <a href="https://www.tipranks.com/" target="_blank" class="flex items-center justify-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">TipRanks</a>
+                        <a href="https://finance.yahoo.com/" target="_blank" class="flex items-center justify-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">Yahoo Finance</a>
+                        <a href="https://www.tipranks.com/experts" target="_blank" class="flex items-center justify-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">Top Ranks</a>
+                    </div>
+                </div>
+
+                <!-- Calendario de Reportes -->
+                <div class="mt-8 bg-white p-6 rounded-2xl shadow-lg">
+                    <h2 class="text-2xl font-semibold mb-4">Próximos Reportes de Ganancias (Earnings)</h2>
+                    <div id="earnings-calendar" class="space-y-3">
+                         <p class="text-center text-gray-500">Cargando...</p>
+                    </div>
+                </div>
             </div>
-        </div>
+
+            <!-- PESTAÑA DE CHECKLIST -->
+            <div id="checklist" class="tab-content">
+                 <header class="text-center mb-8">
+                    <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Checklist Pre-Operación</h1>
+                    <p class="mt-2 text-md text-gray-600">Verifica cada punto antes de ejecutar una operación.</p>
+                </header>
+                <div class="bg-white p-6 rounded-2xl shadow-lg">
+                    <form id="trade-checklist" class="space-y-6">
+                        <!-- Análisis de Mercado -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 border-b pb-2 mb-4">Análisis de Mercado</h3>
+                            <div class="space-y-4">
+                                <fieldset>
+                                    <legend class="text-sm font-medium text-gray-700">1. ¿Cuál es la tendencia principal del mercado?</legend>
+                                    <div class="mt-2 space-x-4">
+                                        <label class="inline-flex items-center"><input type="radio" name="trend" value="bullish" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"> <span class="ml-2">Alcista</span></label>
+                                        <label class="inline-flex items-center"><input type="radio" name="trend" value="bearish" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"> <span class="ml-2">Bajista</span></label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <legend class="text-sm font-medium text-gray-700">2. ¿Hay reunión de la Fed hoy?</legend>
+                                    <div id="fed-meeting-today" class="mt-2 space-x-4">
+                                        <span class="text-gray-500">Verificando...</span>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <legend class="text-sm font-medium text-gray-700">3. ¿Estamos en temporada de earnings?</legend>
+                                    <div id="earnings-season-today" class="mt-2 space-x-4">
+                                         <span class="text-gray-500">Verificando...</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 italic mt-2">Regla: No operar la semana del earning, sino después.</p>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                        <!-- Análisis Técnico -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 border-b pb-2 mb-4">Análisis Técnico</h3>
+                            <div class="space-y-4">
+                                <label class="flex items-center"><input type="checkbox" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"> <span class="ml-3 text-sm text-gray-700">¿Hay ruptura o rompimiento de la línea de tendencia?</span></label>
+                                <label class="flex items-center"><input type="checkbox" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"> <span class="ml-3 text-sm text-gray-700">¿Hay un salto (gap) al alza o a la baja?</span></label>
+                                <label class="flex items-center"><input type="checkbox" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"> <span class="ml-3 text-sm text-gray-700">He marcado puntos de referencia en gráficos de 1D, 1H y 15M.</span></label>
+                                <label class="flex items-center"><input type="checkbox" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"> <span class="ml-3 text-sm text-gray-700">He marcado puntos de rebote en relación a las medias móviles (1D, 1H, 15M).</span></label>
+                            </div>
+                        </div>
+
+                        <!-- Ejecución de la Operación -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 border-b pb-2 mb-4">Ejecución de la Operación</h3>
+                            <div class="space-y-4">
+                                <label class="flex items-center"><input type="checkbox" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"> <span class="ml-3 text-sm text-gray-700">La entrada de la operación se basa en el gráfico de 15 minutos.</span></label>
+                                <label class="flex items-center"><input type="checkbox" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"> <span class="ml-3 text-sm text-gray-700">El spread entre Bid y Ask es aceptable.</span></label>
+                                <label class="flex items-center"><input type="checkbox" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"> <span class="ml-3 text-sm text-gray-700">El precio de compra está dentro del rango óptimo definido en la pestaña de "Análisis".</span></label>
+                                <label class="flex items-center"><input type="checkbox" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"> <span class="ml-3 text-sm text-gray-700">La fecha de expiración es el próximo viernes (la más cercana).</span></label>
+                            </div>
+                        </div>
+                         <div class="pt-4 border-t">
+                            <button type="button" id="reset-checklist" class="w-full bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors">
+                                Reiniciar Checklist
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
-        // --- 1. Funciones de ayuda y configuración inicial ---
+        // --- LÓGICA DE PESTAÑAS ---
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        let newsDataLoaded = false; // Flag para cargar los datos solo una vez
 
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetSelector = tab.dataset.tabTarget;
+                const target = document.querySelector(targetSelector);
+
+                tabContents.forEach(tabContent => {
+                    tabContent.classList.remove('active');
+                });
+                tabs.forEach(t => {
+                    t.classList.remove('active-tab', 'text-indigo-600', 'border-indigo-500');
+                    t.classList.add('inactive-tab', 'text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
+                });
+
+                tab.classList.add('active-tab', 'text-indigo-600', 'border-indigo-500');
+                tab.classList.remove('inactive-tab', 'text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
+                target.classList.add('active');
+
+                // Si se hace clic en la pestaña de noticias y los datos no se han cargado, cárgalos.
+                if (targetSelector === '#noticias' && !newsDataLoaded) {
+                    fetchAllEconomicData();
+                    newsDataLoaded = true;
+                }
+                 if (targetSelector === '#checklist' && !newsDataLoaded) {
+                    fetchAllEconomicData(); // También necesita los datos para autocompletar
+                    newsDataLoaded = true;
+                }
+            });
+        });
+
+        // --- LÓGICA DE LA CALCULADORA ---
         function updateRealValue(inputId, displayId) {
             const input = document.getElementById(inputId);
             const display = document.getElementById(displayId);
@@ -225,8 +396,6 @@
                 }
             });
         }
-
-        // --- 2. Lógica principal de la calculadora ---
 
         function calcular() {
             const inputs = {
@@ -255,13 +424,11 @@
                 }
             }
             
-            // CÁLCULOS AUTOMÁTICOS
             const costOfContracts = inputs.contracts * inputs.premium * 100;
             const totalInvestment = costOfContracts + inputs.commissions;
             const units = inputs.contracts * 100;
             const breakevenPrice = totalInvestment / units;
 
-            // LÓGICA DE VALIDACIÓN ESTRICTA
             let priceRecommendation = { text: '', color: 'gray' };
             const { premium, optimalPriceMin, optimalPriceMax } = inputs;
 
@@ -272,14 +439,13 @@
                 } else if (premium >= optimalPriceMin && premium <= optimalPriceMax) {
                     priceRecommendation.text = 'OPERABLE. El precio pagado está DENTRO del rango óptimo definido.';
                     priceRecommendation.color = 'green';
-                } else { // premium is outside the range
+                } else { 
                     let reason = premium < optimalPriceMin ? 'por debajo del mínimo' : 'por encima del máximo';
                     priceRecommendation.text = `NO OPERAR. El precio pagado está FUERA del rango óptimo (${reason}).`;
                     priceRecommendation.color = 'red';
                 }
             }
 
-            // CÁLCULO DEL PRECIO DE VENTA OBJETIVO Y GANANCIA TOTAL
             const targetSaleTotal = totalInvestment * (1 + inputs.targetProfitPercentage);
             const targetSalePricePerContract = targetSaleTotal / units;
             const totalProfit = totalInvestment * inputs.targetProfitPercentage;
@@ -288,8 +454,6 @@
             displayResults(breakevenPrice, profitTableHTML, inputs, priceRecommendation, targetSalePricePerContract, totalProfit, totalInvestment, costOfContracts);
         }
         
-        // --- 3. Funciones para mostrar resultados y errores ---
-
         function showError(message) {
             const errorDiv = document.getElementById('error-message');
             const resultContainer = document.getElementById('result-container');
@@ -364,7 +528,7 @@
                         <p class="text-lg font-semibold text-gray-700">(= ${(targetSalePricePerContract * 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} / contrato)</p>
                     </div>
                     <p class="text-sm text-gray-500 mt-2">Vende tus contratos a este precio para alcanzar tu objetivo.</p>
-                    <p class="text-md font-semibold text-green-600 mt-2">Ganancia Total Estimada: ${totalProfit.toLocaleString('en-US', { style: 'currency', currency: 'USD' })} <span class="text-sm text-gray-500 font-normal">(${(totalInvestment).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} x ${(inputs.targetProfitPercentage * 100).toFixed(0)}%)</span></p>
+                    <p class="text-md font-semibold text-green-600 mt-2">Ganancia Total Estimada: ${totalProfit.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</p>
                 </div>
             `;
 
@@ -389,10 +553,131 @@
             tableSection.classList.remove('hidden');
         }
         
-        // --- 4. Inicialización ---
+        // --- LÓGICA DE NOTICIAS (APIs) ---
+        
+        const FRED_API_KEY = 'daef8968f17b991affd5805fa538819f';
+        const FINNHUB_API_KEY = 'YOUR_FINNHUB_API_KEY'; // <-- PEGA TU CLAVE DE FINNHUB AQUÍ
+
+        async function fetchAllEconomicData() {
+            const apiErrorDiv = document.getElementById('api-error');
+            apiErrorDiv.classList.add('hidden');
+
+            // --- FRED API Calls ---
+            const fredSeries = { unemployment: 'UNRATE', inflation: 'CPIAUCSL_PC1' };
+            const proxyUrl = 'https://cors-proxy.fringe.workers.dev/';
+            const fredBaseUrl = `https://api.stlouisfed.org/fred/series/observations`;
+            const fredParams = `&api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=1`;
+            
+            const unemploymentUrl = `${proxyUrl}${fredBaseUrl}?series_id=${fredSeries.unemployment}${fredParams}`;
+            const inflationUrl = `${proxyUrl}${fredBaseUrl}?series_id=${fredSeries.inflation}${fredParams}`;
+
+            // --- Finnhub API Calls ---
+            const today = new Date();
+            const fromDate = today.toISOString().split('T')[0];
+            const toDate = new Date(new Date().setDate(today.getDate() + 90)).toISOString().split('T')[0];
+            const finnhubEcoUrl = `https://finnhub.io/api/v1/calendar/economic?from=${fromDate}&to=${toDate}&token=${FINNHUB_API_KEY}`;
+            const finnhubEarningsUrl = `https://finnhub.io/api/v1/calendar/earnings?from=${fromDate}&to=${new Date(new Date().setDate(today.getDate() + 7)).toISOString().split('T')[0]}&token=${FINNHUB_API_KEY}`;
+
+            try {
+                const [unemploymentRes, inflationRes, finnhubEcoRes, finnhubEarningsRes] = await Promise.all([
+                    fetch(unemploymentUrl),
+                    fetch(inflationUrl),
+                    fetch(finnhubEcoUrl),
+                    fetch(finnhubEarningsUrl)
+                ]);
+
+                if (!unemploymentRes.ok || !inflationRes.ok || !finnhubEcoRes.ok || !finnhubEarningsRes.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const unemploymentData = await unemploymentRes.json();
+                const inflationData = await inflationRes.json();
+                const finnhubEcoData = await finnhubEcoRes.json();
+                const finnhubEarningsData = await finnhubEarningsRes.json();
+
+                // Actualizar Tasa de Desempleo (FRED)
+                const unemploymentObservation = unemploymentData.observations[0];
+                document.getElementById('unemployment-rate').textContent = `${parseFloat(unemploymentObservation.value).toFixed(1)}%`;
+                document.getElementById('unemployment-rate-date').textContent = `Reporte de: ${unemploymentObservation.date}`;
+
+                // Actualizar Tasa de Inflación (FRED)
+                const inflationObservation = inflationData.observations[0];
+                document.getElementById('inflation-rate').textContent = `${parseFloat(inflationObservation.value).toFixed(1)}%`;
+                document.getElementById('inflation-rate-date').textContent = `Reporte de: ${inflationObservation.date}`;
+
+                // Procesar datos de Finnhub
+                const calendar = finnhubEcoData.economicCalendar;
+                const latestInterestRate = calendar.filter(e => e.event === 'US Interest Rate Decision').pop();
+                const nextFomcMeeting = calendar.find(e => new Date(e.time) > new Date() && e.event.includes('FOMC Statement'));
+
+                // Actualizar Tasa de Interés (Finnhub)
+                if(latestInterestRate && latestInterestRate.actual) {
+                    document.getElementById('interest-rate').textContent = `${parseFloat(latestInterestRate.actual).toFixed(2)}%`;
+                    document.getElementById('interest-rate-date').textContent = `Última actualización: ${latestInterestRate.time.split(' ')[0]}`;
+                } else {
+                     document.getElementById('interest-rate').textContent = 'N/A';
+                }
+
+                // Actualizar Próxima Reunión FOMC (Finnhub)
+                if(nextFomcMeeting) {
+                    document.getElementById('fomc-date').textContent = new Date(nextFomcMeeting.time).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+                } else {
+                    document.getElementById('fomc-date').textContent = 'Por confirmar';
+                }
+
+                // Actualizar Calendario de Earnings (Finnhub)
+                const earningsCalendarDiv = document.getElementById('earnings-calendar');
+                const earnings = finnhubEarningsData.earningsCalendar.slice(0, 15); // Limitar a 15 resultados
+                if(earnings.length > 0) {
+                    earningsCalendarDiv.innerHTML = earnings.map(e => `
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <div>
+                                <p class="font-bold text-indigo-600">${e.symbol}</p>
+                                <p class="text-xs text-gray-500">${e.date}</p>
+                            </div>
+                            <div class="text-right text-xs">
+                                <p>Estimado: <span class="font-semibold">${e.epsEstimate || 'N/A'}</span></p>
+                                <p>Reportado: <span class="font-semibold">${e.epsActual || 'N/A'}</span></p>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    earningsCalendarDiv.innerHTML = `<p class="text-center text-gray-500">No hay reportes de ganancias importantes en los próximos 7 días.</p>`;
+                }
+
+                // --- LÓGICA PARA AUTOCOMPLETAR CHECKLIST ---
+                const todayStr = new Date().toISOString().split('T')[0];
+                const isFedMeetingToday = calendar.some(e => e.event.includes('FOMC') && e.time.startsWith(todayStr));
+                document.getElementById('fed-meeting-today').innerHTML = `
+                    <label class="inline-flex items-center"><input type="radio" name="fed" value="yes" ${isFedMeetingToday ? 'checked' : ''} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"> <span class="ml-2">Sí</span></label>
+                    <label class="inline-flex items-center"><input type="radio" name="fed" value="no" ${!isFedMeetingToday ? 'checked' : ''} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"> <span class="ml-2">No</span></label>
+                `;
+
+                const isEarningsToday = finnhubEarningsData.earningsCalendar.some(e => e.date === todayStr);
+                 document.getElementById('earnings-season-today').innerHTML = `
+                    <label class="inline-flex items-center"><input type="radio" name="earnings" value="yes" ${isEarningsToday ? 'checked' : ''} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"> <span class="ml-2">Sí</span></label>
+                    <label class="inline-flex items-center"><input type="radio" name="earnings" value="no" ${!isEarningsToday ? 'checked' : ''} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"> <span class="ml-2">No</span></label>
+                `;
+
+
+            } catch (error) {
+                console.error("Error fetching economic data:", error);
+                apiErrorDiv.textContent = "No se pudieron cargar los datos económicos. Revisa las claves de API y tu conexión a internet.";
+                apiErrorDiv.classList.remove('hidden');
+            }
+        }
+
+        // --- LÓGICA DEL CHECKLIST ---
+        document.getElementById('reset-checklist').addEventListener('click', () => {
+            document.getElementById('trade-checklist').reset();
+        });
+
+        // --- INICIALIZACIÓN ---
         window.onload = () => {
             setupRealtimeUpdates();
-            calcular();
+            if (document.querySelector('#analisis').classList.contains('active')) {
+                calcular();
+            }
         };
     </script>
 </body>
