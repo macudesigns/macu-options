@@ -618,61 +618,29 @@
         
         // --- LÓGICA DE NOTICIAS (APIs) ---
         
-        const FRED_API_KEY = 'daef8968f17b991affd5805fa538819f';
-        const FINNHUB_API_KEY = 'd29kngpr01qvhsftog70d29kngpr01qvhsftog7g';
-
         async function fetchAllEconomicData() {
             const apiErrorDiv = document.getElementById('api-error');
             apiErrorDiv.classList.add('hidden');
 
-            // --- FRED API Calls ---
-            const fredSeries = { unemployment: 'UNRATE', inflation: 'CPIAUCSL_PC1' };
-            const proxyUrl = 'https://api.allorigins.win/raw?url=';
-            const fredBaseUrl = `https://api.stlouisfed.org/fred/series/observations`;
-            const fredParams = `&api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=1`;
-            
-            const unemploymentFredUrl = `${fredBaseUrl}?series_id=${fredSeries.unemployment}${fredParams}`;
-            const inflationFredUrl = `${fredBaseUrl}?series_id=${fredSeries.inflation}${fredParams}`;
-
-            const unemploymentUrl = `${proxyUrl}${encodeURIComponent(unemploymentFredUrl)}`;
-            const inflationUrl = `${proxyUrl}${encodeURIComponent(inflationFredUrl)}`;
-
-            // --- Finnhub API Calls ---
-            const today = new Date();
-            const fromDate = today.toISOString().split('T')[0];
-            const toDate = new Date(new Date().setDate(today.getDate() + 90)).toISOString().split('T')[0];
-            const finnhubEcoUrl = `https://finnhub.io/api/v1/calendar/economic?from=${fromDate}&to=${toDate}&token=${FINNHUB_API_KEY}`;
-            const finnhubEarningsUrl = `https://finnhub.io/api/v1/calendar/earnings?from=${fromDate}&to=${new Date(new Date().setDate(today.getDate() + 7)).toISOString().split('T')[0]}&token=${FINNHUB_API_KEY}`;
-
             try {
-                const [unemploymentRes, inflationRes, finnhubEcoRes, finnhubEarningsRes] = await Promise.all([
-                    fetch(unemploymentUrl),
-                    fetch(inflationUrl),
-                    fetch(finnhubEcoUrl),
-                    fetch(finnhubEarningsUrl)
-                ]);
-
-                if (!unemploymentRes.ok || !inflationRes.ok || !finnhubEcoRes.ok || !finnhubEarningsRes.ok) {
-                    throw new Error('Network response was not ok');
+                const response = await fetch('/.netlify/functions/getEconomicData');
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok, status: ${response.status}`);
                 }
-
-                const unemploymentData = await unemploymentRes.json();
-                const inflationData = await inflationRes.json();
-                const finnhubEcoData = await finnhubEcoRes.json();
-                const finnhubEarningsData = await finnhubEarningsRes.json();
+                const data = await response.json();
 
                 // Actualizar Tasa de Desempleo (FRED)
-                const unemploymentObservation = unemploymentData.observations[0];
+                const unemploymentObservation = data.unemploymentData.observations[0];
                 document.getElementById('unemployment-rate').textContent = `${parseFloat(unemploymentObservation.value).toFixed(1)}%`;
                 document.getElementById('unemployment-rate-date').textContent = `Reporte de: ${unemploymentObservation.date}`;
 
                 // Actualizar Tasa de Inflación (FRED)
-                const inflationObservation = inflationData.observations[0];
+                const inflationObservation = data.inflationData.observations[0];
                 document.getElementById('inflation-rate').textContent = `${parseFloat(inflationObservation.value).toFixed(1)}%`;
                 document.getElementById('inflation-rate-date').textContent = `Reporte de: ${inflationObservation.date}`;
 
                 // Procesar datos de Finnhub
-                const calendar = finnhubEcoData.economicCalendar;
+                const calendar = data.finnhubEcoData.economicCalendar;
                 const latestInterestRate = calendar.filter(e => e.event === 'US Interest Rate Decision').pop();
                 const nextFomcMeeting = calendar.find(e => new Date(e.time) > new Date() && e.event.includes('FOMC Statement'));
 
@@ -693,7 +661,7 @@
 
                 // Actualizar Calendario de Earnings (Finnhub)
                 const earningsCalendarDiv = document.getElementById('earnings-calendar');
-                const earnings = finnhubEarningsData.earningsCalendar.slice(0, 15); // Limitar a 15 resultados
+                const earnings = data.finnhubEarningsData.earningsCalendar.slice(0, 15); // Limitar a 15 resultados
                 if(earnings.length > 0) {
                     earningsCalendarDiv.innerHTML = earnings.map(e => `
                         <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
@@ -719,7 +687,7 @@
                     <label class="inline-flex items-center"><input type="radio" name="fed" value="no" ${!isFedMeetingToday ? 'checked' : ''} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"> <span class="ml-2">No</span></label>
                 `;
 
-                const isEarningsToday = finnhubEarningsData.earningsCalendar.some(e => e.date === todayStr);
+                const isEarningsToday = data.finnhubEarningsData.earningsCalendar.some(e => e.date === todayStr);
                  document.getElementById('earnings-season-today').innerHTML = `
                     <label class="inline-flex items-center"><input type="radio" name="earnings" value="yes" ${isEarningsToday ? 'checked' : ''} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"> <span class="ml-2">Sí</span></label>
                     <label class="inline-flex items-center"><input type="radio" name="earnings" value="no" ${!isEarningsToday ? 'checked' : ''} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"> <span class="ml-2">No</span></label>
