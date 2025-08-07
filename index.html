@@ -62,6 +62,9 @@
                 <button data-tab-target="#checklist" class="tab inactive-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300">
                     Checklist
                 </button>
+                <button data-tab-target="#refuerzo" class="tab inactive-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300">
+                    Refuerzo
+                </button>
             </nav>
         </div>
 
@@ -101,7 +104,7 @@
                                             <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>La cantidad de contratos de opciones que vas a comprar.</div>
                                         </div>
                                     </div>
-                                    <input type="number" id="contracts" value="40" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="number" id="contracts" placeholder="ej: 40" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                                 <div>
                                      <div class="flex items-center space-x-2">
@@ -112,7 +115,7 @@
                                         </div>
                                     </div>
                                     <div class="mt-1 flex flex-col sm:flex-row items-stretch sm:items-center sm:space-x-3">
-                                        <input type="number" id="premium" value="0.07" step="0.01" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <input type="number" id="premium" placeholder="ej: 0.07 o 7" step="any" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
                                         <span id="premiumRealValue" class="w-full mt-2 sm:mt-0 sm:w-28 text-center sm:text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
                                     </div>
                                 </div>
@@ -126,7 +129,7 @@
                                             <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El precio al que puedes comprar (Call) o vender (Put) el activo subyacente al vencimiento del contrato.</div>
                                         </div>
                                     </div>
-                                    <input type="number" id="strike" value="35.5" step="0.01" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="number" id="strike" placeholder="ej: 35.5" step="0.01" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                                 <div>
                                      <div class="flex items-center space-x-2">
@@ -136,7 +139,7 @@
                                             <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>Introduce el coste total de las comisiones y otros gastos del bróker para esta operación.</div>
                                         </div>
                                     </div>
-                                    <input type="number" id="commissions" value="0.00" step="0.01" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Opcional">
+                                    <input type="number" id="commissions" placeholder="ej: 2.50" step="0.01" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Opcional">
                                 </div>
                             </div>
                             <div class="pt-4 border-t">
@@ -158,14 +161,14 @@
                                         <div>
                                             <label for="optimalPriceMin" class="block text-xs text-gray-500">Mínimo</label>
                                             <div class="mt-1 flex flex-col sm:flex-row items-stretch sm:items-center sm:space-x-3">
-                                                <input type="number" id="optimalPriceMin" value="0.08" step="0.01" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Opcional">
+                                                <input type="number" id="optimalPriceMin" placeholder="ej: 0.08 o 8" step="any" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Opcional">
                                                 <span id="optimalPriceMinRealValue" class="w-full mt-2 sm:mt-0 sm:w-28 text-center sm:text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
                                             </div>
                                         </div>
                                         <div>
                                             <label for="optimalPriceMax" class="block text-xs text-gray-500">Máximo</label>
                                             <div class="mt-1 flex flex-col sm:flex-row items-stretch sm:items-center sm:space-x-3">
-                                                <input type="number" id="optimalPriceMax" value="0.11" step="0.01" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Opcional">
+                                                <input type="number" id="optimalPriceMax" placeholder="ej: 0.11 o 11" step="any" class="flex-grow w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Opcional">
                                                 <span id="optimalPriceMaxRealValue" class="w-full mt-2 sm:mt-0 sm:w-28 text-center sm:text-right text-gray-600 font-medium bg-gray-100 p-3 rounded-lg"></span>
                                             </div>
                                         </div>
@@ -335,6 +338,63 @@
                     </form>
                 </div>
             </div>
+            
+            <!-- PESTAÑA DE REFUERZO -->
+            <div id="refuerzo" class="tab-content">
+                 <header class="text-center mb-8">
+                    <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Calculadora de Refuerzo</h1>
+                    <p class="mt-2 text-md text-gray-600">Calcula cómo promediar una posición en pérdida.</p>
+                </header>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Columna del formulario de refuerzo -->
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Parámetros de tu Posición Actual</h2>
+                        <form id="reinforcementForm" class="space-y-4">
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <label for="initialInvestment" class="block text-sm font-medium text-gray-700">Inversión Inicial (USD)</label>
+                                    <div class="group relative flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El dinero total que invertiste originalmente en esta posición.</div>
+                                    </div>
+                                </div>
+                                <input type="number" id="initialInvestment" placeholder="ej: 1200" step="0.01" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                             <div>
+                                <div class="flex items-center space-x-2">
+                                    <label for="initialContracts" class="block text-sm font-medium text-gray-700">Contratos Iniciales</label>
+                                    <div class="group relative flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>La cantidad de contratos que compraste en tu operación inicial.</div>
+                                    </div>
+                                </div>
+                                <input type="number" id="initialContracts" placeholder="ej: 10" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <label for="currentContractPrice" class="block text-sm font-medium text-gray-700">Costo Actual por Contrato (USD)</label>
+                                    <div class="group relative flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El precio actual de cada uno de tus contratos (el valor multiplicado por 100).</div>
+                                    </div>
+                                </div>
+                                <input type="number" id="currentContractPrice" placeholder="ej: 48" step="0.01" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <button type="button" onclick="calcularRefuerzo()" class="w-full mt-6 bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
+                                Calcular Refuerzo
+                            </button>
+                        </form>
+                    </div>
+                    <!-- Columna de resultados de refuerzo -->
+                    <div id="refuerzo-result-container" class="bg-white p-6 rounded-2xl shadow-lg hidden">
+                        <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Plan de Refuerzo</h2>
+                        <div id="refuerzo-result" class="space-y-6">
+                            <!-- Los resultados del refuerzo se insertarán aquí -->
+                        </div>
+                         <div id="refuerzo-error-message" class="mt-4 text-center"></div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -362,37 +422,41 @@
                 target.classList.add('active');
 
                 // Si se hace clic en la pestaña de noticias y los datos no se han cargado, cárgalos.
-                if (targetSelector === '#noticias' && !newsDataLoaded) {
+                if ((targetSelector === '#noticias' || targetSelector === '#checklist') && !newsDataLoaded) {
                     fetchAllEconomicData();
-                    newsDataLoaded = true;
-                }
-                 if (targetSelector === '#checklist' && !newsDataLoaded) {
-                    fetchAllEconomicData(); // También necesita los datos para autocompletar
                     newsDataLoaded = true;
                 }
             });
         });
 
         // --- LÓGICA DE LA CALCULADORA ---
-        function updateRealValue(inputId, displayId) {
-            const input = document.getElementById(inputId);
+        function handlePriceInput(event) {
+            const input = event.target;
+            const displayId = `${input.id}RealValue`;
             const display = document.getElementById(displayId);
-            const value = parseFloat(input.value);
-            if (!isNaN(value) && value >= 0) {
-                display.textContent = (value * 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-            } else {
+            let value = parseFloat(input.value);
+
+            if (isNaN(value)) {
                 display.textContent = '';
+                return;
+            }
+
+            // Si el usuario introduce un valor >= 1, se asume que es el importe total en dólares del contrato.
+            if (value >= 1 && !input.value.includes('.')) {
+                const decimalValue = value / 100;
+                input.value = decimalValue.toFixed(2); // Actualiza la entrada para mostrar el precio por acción
+                display.textContent = value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            } else { // De lo contrario, se asume que es el precio por acción
+                display.textContent = (value * 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
             }
         }
 
         function setupRealtimeUpdates() {
             const fieldsToTrack = ['premium', 'optimalPriceMin', 'optimalPriceMax'];
-            fieldsToTrack.forEach(field => {
-                const input = document.getElementById(field);
+            fieldsToTrack.forEach(fieldId => {
+                const input = document.getElementById(fieldId);
                 if (input) {
-                    const displayId = `${field}RealValue`;
-                    input.addEventListener('input', () => updateRealValue(field, displayId));
-                    updateRealValue(field, displayId);
+                    input.addEventListener('input', handlePriceInput);
                 }
             });
         }
@@ -556,7 +620,7 @@
         // --- LÓGICA DE NOTICIAS (APIs) ---
         
         const FRED_API_KEY = 'daef8968f17b991affd5805fa538819f';
-        const FINNHUB_API_KEY = 'd29gg79r01qhoenc1g10d29gg79r01qhoenc1g1g';
+        const FINNHUB_API_KEY = 'd29kngpr01qvhsftog70d29kngpr01qvhsftog7g';
 
         async function fetchAllEconomicData() {
             const apiErrorDiv = document.getElementById('api-error');
@@ -675,12 +739,59 @@
             document.getElementById('trade-checklist').reset();
         });
 
+        // --- LÓGICA DE REFUERZO ---
+        function calcularRefuerzo() {
+            const initialInvestment = parseFloat(document.getElementById('initialInvestment').value);
+            const initialContracts = parseInt(document.getElementById('initialContracts').value);
+            const currentContractPrice = parseFloat(document.getElementById('currentContractPrice').value);
+
+            const errorDiv = document.getElementById('refuerzo-error-message');
+            const resultContainer = document.getElementById('refuerzo-result-container');
+            const resultDiv = document.getElementById('refuerzo-result');
+            errorDiv.innerHTML = '';
+
+            if (isNaN(initialInvestment) || isNaN(initialContracts) || isNaN(currentContractPrice) || initialInvestment <= 0 || initialContracts <= 0 || currentContractPrice <= 0) {
+                resultDiv.innerHTML = '';
+                errorDiv.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert"><p class="font-bold">Error de Validación</p><p>Por favor, introduce valores positivos y válidos.</p></div>`;
+                resultContainer.classList.remove('hidden');
+                return;
+            }
+
+            const contractsToReinforce = Math.round(initialInvestment / currentContractPrice);
+            const reinforcementInvestment = contractsToReinforce * currentContractPrice;
+            const totalContracts = initialContracts + contractsToReinforce;
+            const newTotalInvestment = initialInvestment + reinforcementInvestment;
+            const newAveragePrice = newTotalInvestment / totalContracts;
+
+            resultDiv.innerHTML = `
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-800">Contratos a Reforzar</h3>
+                    <p class="text-2xl font-bold text-indigo-600 mt-1">${contractsToReinforce}</p>
+                    <p class="text-sm text-gray-500 mt-1">(${initialInvestment.toLocaleString('en-US', { style: 'currency', currency: 'USD' })} / ${currentContractPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' })})</p>
+                    <p class="text-sm text-gray-500 mt-1">Cantidad de contratos a comprar para promediar.</p>
+                </div>
+                 <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-800">Inversión de Refuerzo</h3>
+                    <p class="text-2xl font-bold text-indigo-600 mt-1">${reinforcementInvestment.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</p>
+                     <p class="text-sm text-gray-500 mt-1">(${contractsToReinforce} contratos x ${currentContractPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' })})</p>
+                    <p class="text-sm text-gray-500 mt-1">Dinero necesario para comprar los nuevos contratos.</p>
+                </div>
+                <div class="bg-indigo-50 p-4 rounded-lg border-l-4 border-indigo-500">
+                    <h3 class="font-semibold text-gray-800">Resultado de la Posición</h3>
+                     <div class="mt-2 space-y-1 text-sm">
+                        <div class="flex justify-between"><span>Contratos Totales:</span> <span class="font-medium">${totalContracts}</span></div>
+                        <div class="flex justify-between"><span>Inversión Total Acumulada:</span> <span class="font-medium">${newTotalInvestment.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span></div>
+                        <div class="flex justify-between border-t pt-1 mt-1 font-bold"><span>Nuevo Costo Promedio / Contrato:</span> <span>${newAveragePrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span></div>
+                    </div>
+                </div>
+            `;
+            resultContainer.classList.remove('hidden');
+        }
+
         // --- INICIALIZACIÓN ---
         window.onload = () => {
             setupRealtimeUpdates();
-            if (document.querySelector('#analisis').classList.contains('active')) {
-                calcular();
-            }
+            // No calcular al inicio
         };
     </script>
 </body>
