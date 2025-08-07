@@ -1,0 +1,14 @@
+{
+  "name": "macuoptions-functions",
+  "version": "1.0.0",
+  "description": "Serverless functions for MacuOptions Trader",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  }
+}
