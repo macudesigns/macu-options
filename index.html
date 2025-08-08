@@ -15,6 +15,7 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6; /* Gris claro de fondo */
+            overflow-x: hidden; /* Prevenir scroll horizontal */
         }
         /* Estilos para los inputs para ocultar las flechas de número */
         input[type=number]::-webkit-inner-spin-button,
@@ -48,7 +49,7 @@
         </div>
     </header>
 
-    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+    <div class="w-full p-4 sm:p-6 lg:p-8">
 
         <!-- NAVEGACIÓN DE PESTAÑAS -->
         <div class="mb-8 border-b border-gray-200">
