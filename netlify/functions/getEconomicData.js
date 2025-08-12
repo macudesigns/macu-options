@@ -5,11 +5,12 @@ exports.handler = async function(event, context) {
     const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
 
     // --- FRED API URLs ---
-    const fredSeries = { unemployment: 'UNRATE', inflation: 'CPIAUCSL_PC1' };
     const fredBaseUrl = `https://api.stlouisfed.org/fred/series/observations`;
-    const fredParams = `&api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=1`;
-    const unemploymentUrl = `${fredBaseUrl}?series_id=${fredSeries.unemployment}${fredParams}`;
-    const inflationUrl = `${fredBaseUrl}?series_id=${fredSeries.inflation}${fredParams}`;
+    const commonFredParams = `api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=1`;
+    
+    const unemploymentUrl = `${fredBaseUrl}?series_id=UNRATE&${commonFredParams}`;
+    // Correcto: Usar CPIAUCSL con units=pc1 para la inflación interanual
+    const inflationUrl = `${fredBaseUrl}?series_id=CPIAUCSL&${commonFredParams}&units=pc1`;
 
     // --- Finnhub API URLs ---
     const today = new Date();
