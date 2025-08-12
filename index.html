@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* Estilo base para el cuerpo del documento */
-        body {
+        html, body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6; /* Gris claro de fondo */
             overflow-x: hidden; /* Prevenir scroll horizontal */
@@ -53,7 +53,7 @@
 
         <!-- NAVEGACIÓN DE PESTAÑAS -->
         <div class="mb-8 border-b border-gray-200">
-            <nav class="-mb-px flex space-x-6" aria-label="Tabs" id="tabs-container">
+            <nav class="-mb-px flex flex-wrap gap-4 overflow-x-auto md:flex-nowrap md:gap-6" aria-label="Tabs" id="tabs-container">
                 <button data-tab-target="#analisis" class="tab active-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-indigo-600 border-indigo-500">
                     Análisis
                 </button>
@@ -88,7 +88,7 @@
                                     <label for="tipo" class="block text-sm font-medium text-gray-700">Tipo de opción</label>
                                     <div class="group relative flex items-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>Elige 'Call' si esperas que el precio del activo suba, o 'Put' si esperas que baje.</div>
+                                        <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 hidden sm:block"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>Elige 'Call' si esperas que el precio del activo suba, o 'Put' si esperas que baje.</div>
                                     </div>
                                 </div>
                                 <select id="tipo" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
@@ -102,7 +102,7 @@
                                         <label for="contracts" class="block text-sm font-medium text-gray-700">Nº de Contratos</label>
                                         <div class="group relative flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                            <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>La cantidad de contratos de opciones que vas a comprar.</div>
+                                            <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 hidden sm:block"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>La cantidad de contratos de opciones que vas a comprar.</div>
                                         </div>
                                     </div>
                                     <input type="number" id="contracts" placeholder="ej: 40" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
@@ -112,7 +112,7 @@
                                         <label for="strike" class="block text-sm font-medium text-gray-700">Precio Strike</label>
                                         <div class="group relative flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                            <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El precio al que puedes comprar (Call) o vender (Put) el activo subyacente al vencimiento del contrato.</div>
+                                            <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 hidden sm:block"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El precio al que puedes comprar (Call) o vender (Put) el activo subyacente al vencimiento del contrato.</div>
                                         </div>
                                     </div>
                                     <input type="number" id="strike" placeholder="ej: 35.5" step="0.01" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
@@ -124,7 +124,7 @@
                                         <label for="premium" class="block text-sm font-medium text-gray-700">Precio Ask / Unidad</label>
                                         <div class="group relative flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                            <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El precio que pagas por una sola unidad (acción) del contrato.</div>
+                                            <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 hidden sm:block"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El precio que pagas por una sola unidad (acción) del contrato.</div>
                                         </div>
                                     </div>
                                     <input type="number" id="premium" placeholder="ej: 0.32" step="any" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
@@ -140,7 +140,7 @@
                                         <label for="commissions" class="block text-sm font-medium text-gray-700">Comisiones (Total, USD)</label>
                                         <div class="group relative flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                            <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>Introduce el coste total de las comisiones y otros gastos del bróker para esta operación.</div>
+                                            <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 hidden sm:block"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>Introduce el coste total de las comisiones y otros gastos del bróker para esta operación.</div>
                                         </div>
                                     </div>
                                     <input type="number" id="commissions" placeholder="ej: 2.50" step="0.01" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3" placeholder="Opcional">
@@ -153,7 +153,7 @@
                                             <label class="block text-sm font-medium text-gray-700">Rango de Precio Óptimo (por Contrato)</label>
                                             <div class="group relative flex items-center">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                                <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El rango de precios (mínimo y máximo) que consideras aceptable para el costo total del contrato, según tu análisis.</div>
+                                                <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 hidden sm:block"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>El rango de precios (mínimo y máximo) que consideras aceptable para el costo total del contrato, según tu análisis.</div>
                                             </div>
                                         </div>
                                         <a href="https://docs.google.com/spreadsheets/d/1JH-nYSubRs6eznGMjl-gjCE3P6NEo_utrI2zPDci1LM/edit?gid=0#gid=0" target="_blank" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -177,7 +177,7 @@
                                         <label for="targetProfitPercentage" class="block text-sm font-medium text-gray-700">Seleccionar Objetivo de Ganancia</label>
                                         <div class="group relative flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                            <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>Elige el porcentaje de ganancia que deseas obtener sobre tu inversión total para calcular el precio de venta necesario.</div>
+                                            <div class="absolute bottom-full mb-2 w-60 rounded-lg bg-gray-800 p-3 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 hidden sm:block"><span class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></span>Elige el porcentaje de ganancia que deseas obtener sobre tu inversión total para calcular el precio de venta necesario.</div>
                                         </div>
                                     </div>
                                     <select id="targetProfitPercentage" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
