@@ -1081,6 +1081,48 @@
                   '<button onclick="updateStatus(' + p.id + ',\'win\')"  class="px-3 py-1.5 text-xs font-bold bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg transition-colors ml-2">✅ Ganada</button>' +
                   '<button onclick="updateStatus(' + p.id + ',\'loss\')" class="px-3 py-1.5 text-xs font-bold bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors ml-2">❌ Perdida</button>'
                 : '<button onclick="updateStatus(' + p.id + ',\'open\')" class="px-3 py-1.5 text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors">↩ Reabrir</button>';
+            // ── Simplified card for closed positions ──────────────────────────────
+            if (p.status !== 'open') {
+                var isWin = p.status === 'win';
+                var pnlBlock = isWin
+                    ? '<div class="flex flex-wrap items-center gap-4 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-100">' +
+                          '<div><p class="text-xs text-gray-400 mb-0.5">Inversión</p><p class="font-bold text-gray-700">' + fmt(p.totalCostBasis) + '</p></div>' +
+                          '<div class="w-px h-8 bg-emerald-200 hidden sm:block"></div>' +
+                          '<div><p class="text-xs text-gray-400 mb-0.5">Ganancia obtenida</p><p class="font-bold text-emerald-600 text-lg">+' + fmt(liveTargetNetProfit) + '</p></div>' +
+                          '<span class="ml-auto px-2.5 py-1 bg-emerald-100 text-emerald-700 font-extrabold text-sm rounded-lg">+' + liveProfitPctDisplay + '%</span>' +
+                      '</div>'
+                    : '<div class="flex flex-wrap items-center gap-4 px-4 py-3 rounded-xl bg-red-50 border border-red-100">' +
+                          '<div><p class="text-xs text-gray-400 mb-0.5">Inversión perdida</p><p class="font-bold text-red-600 text-lg">-' + fmt(p.totalCostBasis) + '</p></div>' +
+                          (p.notes ? '' : '') +
+                      '</div>';
+                return '<div class="pos-card ' + s.bg + ' border ' + s.border + ' rounded-xl p-4">' +
+                    '<div class="flex items-center justify-between mb-3">' +
+                        '<div class="flex flex-wrap items-center gap-2">' +
+                            '<span class="text-xl font-extrabold font-mono tracking-tight text-gray-900">' + esc(p.ticker) + '</span>' +
+                            '<span class="px-2 py-0.5 text-xs font-bold rounded-full ' + typeColor + '">' + typeLabel + '</span>' +
+                            '<span class="px-2 py-0.5 text-xs font-bold rounded-full ' + s.badge + '">' + s.label + '</span>' +
+                        '</div>' +
+                        '<button onclick="deletePosition(' + p.id + ')" title="Eliminar" class="text-gray-300 hover:text-red-400 transition-colors">' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>' +
+                        '</button>' +
+                    '</div>' +
+                    '<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 mb-3">' +
+                        '<span>Strike <strong class="text-gray-700">$' + (p.strike != null ? p.strike.toFixed(2) : '—') + '</strong></span>' +
+                        '<span class="text-gray-300">·</span>' +
+                        '<span><strong class="text-gray-700">' + p.contracts + '</strong> contratos</span>' +
+                        '<span class="text-gray-300">·</span>' +
+                        '<span>Exp: <strong class="text-gray-700">' + expiLabel + '</strong></span>' +
+                    '</div>' +
+                    pnlBlock +
+                    (p.notes ? '<p class="text-xs text-gray-400 mt-2 px-1 italic">' + esc(p.notes) + '</p>' : '') +
+                    '<div class="flex items-center justify-between mt-3">' +
+                        '<span class="text-xs text-gray-400">📅 ' + p.dateAdded + '</span>' +
+                        '<button onclick="updateStatus(' + p.id + ',\'open\')" class="px-3 py-1.5 text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors">↩ Reabrir</button>' +
+                    '</div>' +
+                '</div>';
+            }
+
+            // ── Full card for open positions ───────────────────────────────────────
             return '<div class="pos-card ' + s.bg + ' border ' + s.border + ' rounded-xl p-5">' +
                 '<div class="flex items-start justify-between mb-4">' +
                     '<div class="flex flex-wrap items-center gap-2">' +
