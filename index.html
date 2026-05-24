@@ -75,7 +75,6 @@
             <button data-tab="#analisis"  class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all bg-indigo-50 text-indigo-700">📊 Análisis</button>
             <button data-tab="#diario"    class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">📁 Diario</button>
             <button data-tab="#noticias"  class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">📈 Mercado</button>
-            <button data-tab="#refuerzo"  class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">🔧 Refuerzo</button>
             <button data-tab="#interes"   class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">💰 Interés</button>
             <button data-tab="#inversion" class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">🏠 Inversión</button>
         </div>
@@ -292,26 +291,7 @@
                 </div>
             </div>
 
-            <!-- TAB: REFUERZO -->
-            <div id="refuerzo" class="tab-content">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="card">
-                        <h2 class="text-base font-bold text-gray-900 mb-2 pb-3 border-b">🔧 Calculadora de Refuerzo</h2>
-                        <p class="text-sm text-gray-500 mb-5">Calcula cómo promediar una posición en pérdida.</p>
-                        <form id="reinforcementForm" class="space-y-4">
-                            <div><label class="label">Inversión Inicial (USD)</label><input type="number" id="initialInvestment" placeholder="ej: 1200" step="0.01" class="input-field"></div>
-                            <div><label class="label">Contratos Iniciales</label><input type="number" id="initialContracts" placeholder="ej: 10" class="input-field"></div>
-                            <div><label class="label">Costo Actual por Contrato (USD)</label><input type="number" id="currentContractPrice" placeholder="ej: 48" step="0.01" class="input-field"></div>
-                            <button type="button" onclick="calcularRefuerzo()" class="btn-primary mt-2">Calcular Refuerzo</button>
-                        </form>
-                    </div>
-                    <div id="refuerzo-result-container" class="card hidden">
-                        <h2 class="text-base font-bold text-gray-900 mb-4">Plan de Refuerzo</h2>
-                        <div id="refuerzo-result" class="space-y-4"></div>
-                        <div id="refuerzo-error-message" class="mt-4"></div>
-                    </div>
-                </div>
-            </div>
+
 
             <!-- TAB: INTERÉS COMPUESTO -->
             <div id="interes" class="tab-content">
