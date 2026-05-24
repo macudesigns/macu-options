@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MacuOptions Trader</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -255,24 +256,134 @@
 
             <!-- TAB: MERCADO -->
             <div id="noticias" class="tab-content">
-                <!-- USA legend -->
-                <div class="flex items-center gap-2 mb-4 px-1">
+
+                <!-- Header bar -->
+                <div class="flex flex-wrap items-center gap-2 mb-4 px-1">
                     <span class="text-lg">🇺🇸</span>
-                    <span class="text-sm font-semibold text-gray-500">Todos los datos corresponden al <strong class="text-gray-700">mercado de Estados Unidos (EE.UU.)</strong></span>
+                    <span class="text-sm font-semibold text-gray-500">Consola de Ejecución — <strong class="text-gray-700">Mercado EE.UU.</strong></span>
                     <div class="ml-auto flex items-center gap-2 flex-shrink-0">
+                        <button id="learn-mode-btn" onclick="toggleLearningMode()" class="flex items-center gap-1.5 py-1.5 px-3 rounded-lg border text-xs font-semibold transition-colors border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100">🎓 Modo Aprendizaje: OFF</button>
                         <span id="market-last-updated" class="text-xs text-gray-400"></span>
                         <button onclick="refreshMarketData()" id="market-refresh-btn" class="flex items-center gap-1 py-1.5 px-3 rounded-lg border border-gray-200 text-xs font-semibold text-gray-500 hover:bg-gray-50 transition-colors">↺ Actualizar</button>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div class="card"><p class="label">Tasa de Interés (Fed)</p><p id="interest-rate" class="text-3xl font-bold text-indigo-600 mt-1">—</p><p id="interest-rate-date" class="text-xs text-gray-400 mt-1"></p></div>
-                    <div class="card"><p class="label">Desempleo (UNRATE)</p><p id="unemployment-rate" class="text-3xl font-bold text-indigo-600 mt-1">—</p><p id="unemployment-rate-date" class="text-xs text-gray-400 mt-1"></p></div>
-                    <div class="card"><p class="label">Inflación IPC (Anual)</p><p id="inflation-rate" class="text-3xl font-bold text-indigo-600 mt-1">—</p><p id="inflation-rate-date" class="text-xs text-gray-400 mt-1"></p></div>
-                    <div class="card"><p class="label">Próxima Reunión FOMC</p><p id="fomc-date" class="text-3xl font-bold text-indigo-600 mt-1">—</p><p class="text-xs text-gray-400 mt-1">Decisión sobre tasas</p></div>
-                </div>
+
                 <div id="api-error" class="hidden mb-5 text-sm text-red-700 bg-red-50 border border-red-200 p-4 rounded-xl"></div>
-                <div class="card mb-6">
-                    <h2 class="text-base font-bold text-gray-900 mb-4">🔗 Herramientas y Recursos</h2>
+
+                <!-- ── BLOCK 1: General Market Status ── -->
+                <div class="card mb-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-base font-bold text-gray-900">📡 Bloque 1 — Estado General del Mercado</h2>
+                        <div id="b1-badges" class="flex gap-2 flex-wrap justify-end"></div>
+                    </div>
+                    <div id="b1-learn" class="hidden mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 leading-relaxed">
+                        <strong>¿Qué es la Liquidez Neta?</strong> Fed Balance Sheet − TGA − Reverse Repo. Cuando sube, hay más dinero en el sistema → mercados tienden a subir. El VIX mide miedo (>20 = alerta, >30 = pánico). El DXY es la fortaleza del dólar. La curva 10Y-2Y negativa indica posible recesión.
+                    </div>
+                    <!-- Macro stat cards: 4 existing + new -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+                        <div class="bg-gray-50 rounded-xl p-3 text-center"><p class="text-xs text-gray-500 mb-1">Fed Funds</p><p id="interest-rate" class="text-xl font-bold text-indigo-600">—</p><p id="interest-rate-date" class="text-xs text-gray-400"></p></div>
+                        <div class="bg-gray-50 rounded-xl p-3 text-center"><p class="text-xs text-gray-500 mb-1">Desempleo</p><p id="unemployment-rate" class="text-xl font-bold text-indigo-600">—</p><p id="unemployment-rate-date" class="text-xs text-gray-400"></p></div>
+                        <div class="bg-gray-50 rounded-xl p-3 text-center"><p class="text-xs text-gray-500 mb-1">Inflación IPC</p><p id="inflation-rate" class="text-xl font-bold text-indigo-600">—</p><p id="inflation-rate-date" class="text-xs text-gray-400"></p></div>
+                        <div class="bg-gray-50 rounded-xl p-3 text-center"><p class="text-xs text-gray-500 mb-1">VIX</p><p id="b1-vix" class="text-xl font-bold text-indigo-600">—</p><p class="text-xs text-gray-400">Miedo</p></div>
+                        <div class="bg-gray-50 rounded-xl p-3 text-center"><p class="text-xs text-gray-500 mb-1">DXY</p><p id="b1-dxy" class="text-xl font-bold text-indigo-600">—</p><p class="text-xs text-gray-400">Dólar</p></div>
+                        <div class="bg-gray-50 rounded-xl p-3 text-center"><p class="text-xs text-gray-500 mb-1">Curva 10Y-2Y</p><p id="b1-t10y2y" class="text-xl font-bold text-indigo-600">—</p><p class="text-xs text-gray-400">Inversión</p></div>
+                    </div>
+                    <!-- Thermometers -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="b1-thermometers"></div>
+                </div>
+
+                <!-- ── BLOCK 2: Liquidity & Credit Engine ── -->
+                <div class="card mb-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-base font-bold text-gray-900">💧 Bloque 2 — Motor de Liquidez y Crédito</h2>
+                        <div class="flex gap-2" id="b2-badges"></div>
+                    </div>
+                    <div id="b2-learn" class="hidden mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 leading-relaxed">
+                        <strong>NFCI (Chicago Fed)</strong> — Valores negativos = condiciones financieras fáciles (bueno para mercados). Valores >0 = condiciones apretadas (riesgo). <strong>HY Spread</strong> — Diferencial de bonos basura vs. tesoros. >4.5% activa el Modo Bunker: mercado en modo defensivo, las reversiones están bloqueadas.
+                    </div>
+                    <div class="relative h-52 mb-4">
+                        <canvas id="liquidity-chart"></canvas>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3" id="b2-stats"></div>
+                </div>
+
+                <!-- ── BLOCK 3 + 5 side-by-side: Leaders / Laggards ── -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                    <div class="card">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-base font-bold text-gray-900">🏆 Bloque 3 — Sectores Líderes</h2>
+                            <span class="text-xs text-gray-400">RS Score</span>
+                        </div>
+                        <div id="b3-learn" class="hidden mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 leading-relaxed">
+                            El <strong>RS Score</strong> combina: rendimiento relativo vs SPY (35%), momentum 1 mes (25%), tendencia de volumen (20%), distancia de medias 50 y 200 días (15%). Una puntuación alta indica que el sector está en tendencia alcista sostenida.
+                        </div>
+                        <div id="b3-content" class="space-y-3"><p class="text-center text-gray-400 text-sm py-6">Cargando...</p></div>
+                    </div>
+                    <div class="card">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-base font-bold text-gray-900">📉 Bloque 5 — Mercados Débiles</h2>
+                            <span class="text-xs text-gray-400">RS Score bajo</span>
+                        </div>
+                        <div id="b5-learn" class="hidden mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 leading-relaxed">
+                            Sectores con el RS Score más bajo. Pueden ser candidatos a short (vender calls cubiertas, puts) o simplemente para evitar. No confundir con los Bloque 6 (reversiones): éstos pueden seguir cayendo.
+                        </div>
+                        <div id="b5-content" class="space-y-3"><p class="text-center text-gray-400 text-sm py-6">Cargando...</p></div>
+                    </div>
+                </div>
+
+                <!-- ── BLOCK 4: Volume Flows ── -->
+                <div class="card mb-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-base font-bold text-gray-900">🌊 Bloque 4 — Flujos de Volumen</h2>
+                        <span class="text-xs text-gray-400">Volumen 5D vs 20D</span>
+                    </div>
+                    <div id="b4-learn" class="hidden mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 leading-relaxed">
+                        Compara el volumen promedio de los últimos 5 días contra el promedio de 20 días. <strong>Dinero entrando (ratio >1.5x)</strong> con precio subiendo indica acumulación institucional. <strong>Volumen secándose (ratio &lt;0.6x)</strong> puede indicar falta de interés o distribución silenciosa.
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-2">💰 Dinero Entrando</p>
+                            <div id="b4-flowing-in" class="space-y-2"><p class="text-gray-400 text-sm">—</p></div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">🏜️ Volumen Secándose</p>
+                            <div id="b4-drying-up" class="space-y-2"><p class="text-gray-400 text-sm">—</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── BLOCK 6: Reversions ── -->
+                <div class="card mb-4" id="b6-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-base font-bold text-gray-900">🔄 Bloque 6 — Reversiones al Alza</h2>
+                            <span id="bunker-badge" class="hidden text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">🛡️ MODO BUNKER</span>
+                        </div>
+                        <span class="text-xs text-gray-400">Opp Score</span>
+                    </div>
+                    <div id="b6-learn" class="hidden mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 leading-relaxed">
+                        El <strong>Opportunity Score</strong> busca sectores sobrevendidos con señales de giro: peor rendimiento 3 meses (invertido, 40%) + spike de volumen reciente (30%) + RoC positivo 5 días (30%). En <strong>Modo Bunker</strong> (HY Spread >4.5% o NFCI >0.5) este bloque se bloquea: no es momento de comprar rebotes.
+                    </div>
+                    <div id="b6-content" class="space-y-3"><p class="text-center text-gray-400 text-sm py-6">Cargando...</p></div>
+                </div>
+
+                <!-- ── Calendars ── -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                    <div class="card">
+                        <h2 class="text-base font-bold text-gray-900 mb-3">🏦 Próxima Reunión FOMC</h2>
+                        <p id="fomc-date" class="text-3xl font-bold text-indigo-600">—</p>
+                        <p class="text-xs text-gray-400 mt-1">Decisión sobre tasas de interés</p>
+                    </div>
+                    <div class="card">
+                        <h2 class="text-base font-bold text-gray-900 mb-3">📅 Earnings Próximos (7 días)</h2>
+                        <div id="earnings-calendar" class="space-y-2"><p class="text-center text-gray-400 text-sm py-4">Cargando datos...</p></div>
+                        <p class="text-xs text-gray-400 mt-3 text-center">Fuente: Finnhub</p>
+                    </div>
+                </div>
+
+                <!-- ── Tools ── -->
+                <div class="card">
+                    <h2 class="text-base font-bold text-gray-900 mb-3">🔗 Herramientas y Recursos</h2>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         <a href="https://finviz.com/" target="_blank" class="p-3 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg text-sm font-semibold text-center transition-colors border border-gray-100">Finviz</a>
                         <a href="https://www.marketwatch.com/" target="_blank" class="p-3 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg text-sm font-semibold text-center transition-colors border border-gray-100">MarketWatch</a>
@@ -283,11 +394,6 @@
                         <a href="https://www.cboe.com/" target="_blank" class="p-3 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg text-sm font-semibold text-center transition-colors border border-gray-100">CBOE</a>
                         <a href="https://www.federalreserve.gov/" target="_blank" class="p-3 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg text-sm font-semibold text-center transition-colors border border-gray-100">Federal Reserve</a>
                     </div>
-                </div>
-                <div class="card">
-                    <h2 class="text-base font-bold text-gray-900 mb-4">📅 Próximos Reportes de Ganancias (Earnings) — 🇺🇸 EE.UU.</h2>
-                    <div id="earnings-calendar" class="space-y-2"><p class="text-center text-gray-400 text-sm py-10">Cargando datos...</p></div>
-                    <p class="text-xs text-gray-400 mt-4 text-center">Fuente: Finnhub &nbsp;·&nbsp; Datos del mercado estadounidense</p>
                 </div>
             </div>
 
@@ -1254,36 +1360,178 @@
         el.innerHTML = (fromCache ? '📦 Caché' : '✅ Actualizado') + ' · ' + timeStr + ' &nbsp;·&nbsp; ' + slotLabels[getMarketSlot()];
     }
 
+    var learningMode   = false;
+    var liquidityChart = null;
+
+    var SECTOR_NAMES = {
+        XLK:'Tecnología', XLC:'Comunicación', XLF:'Financiero', XLV:'Salud',
+        XLY:'Cons. Discrecional', XLP:'Cons. Básico', XLI:'Industrial',
+        XLE:'Energía', XLU:'Utilities', XLRE:'Inmobiliario', XLB:'Materiales'
+    };
+
+    function toggleLearningMode() {
+        learningMode = !learningMode;
+        var btn = document.getElementById('learn-mode-btn');
+        btn.textContent = '🎓 Modo Aprendizaje: ' + (learningMode ? 'ON' : 'OFF');
+        btn.className = learningMode
+            ? 'flex items-center gap-1.5 py-1.5 px-3 rounded-lg border text-xs font-semibold transition-colors border-amber-500 text-white bg-amber-500 hover:bg-amber-600'
+            : 'flex items-center gap-1.5 py-1.5 px-3 rounded-lg border text-xs font-semibold transition-colors border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100';
+        ['b1-learn','b2-learn','b3-learn','b4-learn','b5-learn','b6-learn'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) { learningMode ? el.classList.remove('hidden') : el.classList.add('hidden'); }
+        });
+    }
+    window.toggleLearningMode = toggleLearningMode;
+
+    function thermometerHtml(label, val, min, max, unit, thresholds) {
+        // thresholds: [{val, color}] sorted ascending
+        if (val == null) return '<div class="bg-gray-50 rounded-xl p-3"><p class="text-xs text-gray-500 mb-1">' + label + '</p><p class="text-sm font-bold text-gray-400">N/A</p></div>';
+        var pct    = Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
+        var color  = 'bg-emerald-400';
+        if (thresholds) {
+            for (var i = 0; i < thresholds.length; i++) {
+                if (val >= thresholds[i].val) color = thresholds[i].color;
+            }
+        }
+        return '<div class="bg-gray-50 rounded-xl p-3">' +
+            '<div class="flex justify-between items-center mb-1">' +
+                '<p class="text-xs text-gray-500">' + label + '</p>' +
+                '<p class="text-sm font-bold text-gray-700">' + (typeof val === 'number' ? val.toFixed(2) : val) + (unit || '') + '</p>' +
+            '</div>' +
+            '<div class="w-full bg-gray-200 rounded-full h-2"><div class="' + color + ' h-2 rounded-full transition-all" style="width:' + pct.toFixed(1) + '%"></div></div>' +
+        '</div>';
+    }
+
+    function sectorBarHtml(s, scoreField, color, locked) {
+        var score  = s[scoreField] != null ? Math.round(s[scoreField]) : 0;
+        var name   = SECTOR_NAMES[s.sym] || s.sym;
+        var perf   = s.perf1m != null ? (s.perf1m > 0 ? '+' : '') + s.perf1m.toFixed(1) + '%' : '—';
+        var overlay = locked ? ' opacity-40 pointer-events-none select-none' : '';
+        return '<div class="bg-gray-50 rounded-xl p-3' + overlay + '">' +
+            '<div class="flex justify-between items-center mb-1">' +
+                '<div>' +
+                    '<span class="font-bold text-xs font-mono text-indigo-600 mr-1">' + esc(s.sym) + '</span>' +
+                    '<span class="text-xs text-gray-500">' + esc(name) + '</span>' +
+                '</div>' +
+                '<div class="text-right">' +
+                    '<span class="text-xs font-bold ' + color + '">' + score + '</span>' +
+                    '<span class="text-xs text-gray-400 ml-1">· 1m ' + perf + '</span>' +
+                '</div>' +
+            '</div>' +
+            '<div class="w-full bg-gray-200 rounded-full h-1.5">' +
+                '<div class="' + (color.replace('text-','bg-')) + ' h-1.5 rounded-full" style="width:' + score + '%"></div>' +
+            '</div>' +
+        '</div>';
+    }
+
+    function flowItemHtml(a, dir) {
+        var arrow  = dir === 'in' ? '▲' : '▼';
+        var cls    = dir === 'in' ? 'text-emerald-600' : 'text-red-500';
+        var chgStr = a.priceChg != null ? (a.priceChg > 0 ? '+' : '') + a.priceChg.toFixed(1) + '%' : '';
+        return '<div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">' +
+            '<div class="flex items-center gap-2">' +
+                '<span class="' + cls + ' text-xs font-bold w-3">' + arrow + '</span>' +
+                '<span class="font-bold text-xs font-mono text-indigo-600 w-14">' + esc(a.sym) + '</span>' +
+            '</div>' +
+            '<div class="text-right text-xs">' +
+                '<span class="font-bold text-gray-700">' + a.volRatio.toFixed(2) + 'x</span>' +
+                (chgStr ? '<span class="ml-1 ' + cls + '">' + chgStr + '</span>' : '') +
+            '</div>' +
+        '</div>';
+    }
+
+    function renderLiquidityChart(netLiquidity, spyForChart) {
+        var canvas = document.getElementById('liquidity-chart');
+        if (!canvas || typeof Chart === 'undefined') return;
+        if (liquidityChart) { liquidityChart.destroy(); liquidityChart = null; }
+        if (!netLiquidity || !netLiquidity.length) return;
+
+        var labels  = netLiquidity.map(function(d){ return d.date.slice(5); }); // MM-DD
+        var nlVals  = netLiquidity.map(function(d){ return d.value; });
+
+        // Align SPY to same date count (trim or pad)
+        var spyVals = [];
+        if (spyForChart && spyForChart.length) {
+            var offset = netLiquidity.length - spyForChart.length;
+            for (var i = 0; i < netLiquidity.length; i++) {
+                var si = i - offset;
+                spyVals.push(si >= 0 && si < spyForChart.length ? spyForChart[si].value : null);
+            }
+        }
+
+        var ctx = canvas.getContext('2d');
+        liquidityChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Liquidez Neta Fed (B$)',
+                        data: nlVals,
+                        borderColor: 'rgba(99,102,241,0.9)',
+                        backgroundColor: 'rgba(99,102,241,0.08)',
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 0,
+                        yAxisID: 'yNL',
+                    },
+                    spyVals.length ? {
+                        label: 'SPY',
+                        data: spyVals,
+                        borderColor: 'rgba(16,185,129,0.85)',
+                        backgroundColor: 'transparent',
+                        fill: false,
+                        tension: 0.35,
+                        pointRadius: 0,
+                        borderDash: [4, 3],
+                        yAxisID: 'ySPY',
+                    } : null,
+                ].filter(Boolean),
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { labels: { font: { size: 11 }, boxWidth: 14 } } },
+                scales: {
+                    x: { ticks: { maxTicksLimit: 8, font: { size: 10 } }, grid: { display: false } },
+                    yNL:  { type: 'linear', position: 'left',  ticks: { font: { size: 10 }, callback: function(v){ return v + 'B'; } }, grid: { color: 'rgba(0,0,0,0.04)' } },
+                    ySPY: { type: 'linear', position: 'right', ticks: { font: { size: 10 } }, grid: { drawOnChartArea: false } },
+                },
+            },
+        });
+    }
+
     function renderMarketData(data) {
-        var unemp = data.unemploymentData.observations[0];
-        document.getElementById('unemployment-rate').textContent      = parseFloat(unemp.value).toFixed(1) + '%';
-        document.getElementById('unemployment-rate-date').textContent = 'Reporte: ' + unemp.date;
-
-        var infl = data.inflationData.observations[0];
-        document.getElementById('inflation-rate').textContent      = parseFloat(infl.value).toFixed(1) + '%';
-        document.getElementById('inflation-rate-date').textContent = 'Reporte: ' + infl.date;
-
+        // ── Existing macro stats ──────────────────────────────────────────
+        var unemp = data.unemploymentData && data.unemploymentData.observations && data.unemploymentData.observations[0];
+        if (unemp && unemp.value !== 'N/A') {
+            document.getElementById('unemployment-rate').textContent      = parseFloat(unemp.value).toFixed(1) + '%';
+            document.getElementById('unemployment-rate-date').textContent = unemp.date;
+        }
+        var infl = data.inflationData && data.inflationData.observations && data.inflationData.observations[0];
+        if (infl && infl.value !== 'N/A') {
+            document.getElementById('inflation-rate').textContent      = parseFloat(infl.value).toFixed(1) + '%';
+            document.getElementById('inflation-rate-date').textContent = infl.date;
+        }
         var fedfunds = data.fedfundsData && data.fedfundsData.observations && data.fedfundsData.observations[0];
         if (fedfunds && fedfunds.value !== 'N/A') {
             document.getElementById('interest-rate').textContent      = parseFloat(fedfunds.value).toFixed(2) + '%';
-            document.getElementById('interest-rate-date').textContent = 'Reporte: ' + fedfunds.date;
-        } else {
-            document.getElementById('interest-rate').textContent      = 'N/A';
-            document.getElementById('interest-rate-date').textContent = '';
+            document.getElementById('interest-rate-date').textContent = fedfunds.date;
         }
 
-        var cal      = data.finnhubEcoData.economicCalendar || [];
+        var cal      = (data.finnhubEcoData && data.finnhubEcoData.economicCalendar) || [];
         var nextFomc = cal.find(function(e){ return new Date(e.time) > new Date() && (e.event.includes('FOMC') || e.event.includes('Interest Rate')); });
         document.getElementById('fomc-date').textContent = nextFomc
-            ? new Date(nextFomc.time).toLocaleDateString('es-ES', { day:'numeric', month:'short' })
+            ? new Date(nextFomc.time).toLocaleDateString('es-ES', { day:'numeric', month:'short', year:'numeric' })
             : 'Por confirmar';
 
         var earningsEl = document.getElementById('earnings-calendar');
-        var earnings   = (data.finnhubEarningsData.earningsCalendar || []).slice(0, 15);
+        var earnings   = ((data.finnhubEarningsData && data.finnhubEarningsData.earningsCalendar) || []).slice(0, 15);
         earningsEl.innerHTML = earnings.length > 0
             ? earnings.map(function(e) {
                 var name = e.companyName ? esc(e.companyName) : '';
-                return '<div class="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors gap-2">' +
+                return '<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg gap-2">' +
                     '<div class="flex items-center gap-3 min-w-0">' +
                         '<span class="font-bold text-indigo-600 font-mono text-sm flex-shrink-0 w-14">' + esc(e.symbol) + '</span>' +
                         '<div class="min-w-0">' +
@@ -1301,7 +1549,99 @@
 
         var today = new Date().toISOString().split('T')[0];
         marketFedToday      = cal.some(function(e){ return e.event.includes('FOMC') && e.time.startsWith(today); });
-        marketEarningsToday = (data.finnhubEarningsData.earningsCalendar || []).some(function(e){ return e.date === today; });
+        marketEarningsToday = ((data.finnhubEarningsData && data.finnhubEarningsData.earningsCalendar) || []).some(function(e){ return e.date === today; });
+
+        // ── Block 1: new macro values ─────────────────────────────────────
+        var m = data.macro || {};
+        if (m.vix    != null) document.getElementById('b1-vix').textContent    = m.vix.toFixed(2);
+        if (m.dxy    != null) document.getElementById('b1-dxy').textContent    = m.dxy.toFixed(2);
+        if (m.t10y2y != null) document.getElementById('b1-t10y2y').textContent = (m.t10y2y > 0 ? '+' : '') + m.t10y2y.toFixed(2) + '%';
+
+        // Color vix
+        var vixEl = document.getElementById('b1-vix');
+        if (m.vix != null) vixEl.className = 'text-xl font-bold ' + (m.vix > 30 ? 'text-red-600' : m.vix > 20 ? 'text-amber-500' : 'text-emerald-600');
+        var t10El = document.getElementById('b1-t10y2y');
+        if (m.t10y2y != null) t10El.className = 'text-xl font-bold ' + (m.t10y2y < 0 ? 'text-red-600' : 'text-emerald-600');
+
+        // Regime badges
+        var badgesEl = document.getElementById('b1-badges');
+        var badges   = [];
+        if (m.vix != null) {
+            if (m.vix > 30) badges.push('<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">🔴 Pánico VIX ' + m.vix.toFixed(0) + '</span>');
+            else if (m.vix > 20) badges.push('<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">🟡 Alerta VIX ' + m.vix.toFixed(0) + '</span>');
+            else badges.push('<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">🟢 VIX Normal ' + m.vix.toFixed(0) + '</span>');
+        }
+        if (m.t10y2y != null && m.t10y2y < 0) badges.push('<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">📉 Curva Invertida</span>');
+        if (m.bunkerMode) badges.push('<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">🛡️ Modo Bunker</span>');
+        badgesEl.innerHTML = badges.join('');
+
+        // Thermometers
+        var thEl = document.getElementById('b1-thermometers');
+        thEl.innerHTML =
+            thermometerHtml('VIX (Volatilidad)', m.vix, 10, 50, '', [{val:20,color:'bg-amber-400'},{val:30,color:'bg-red-500'}]) +
+            thermometerHtml('DXY (Dólar)', m.dxy, 90, 115, '', [{val:100,color:'bg-amber-400'},{val:107,color:'bg-red-400'}]) +
+            thermometerHtml('Curva 10Y-2Y', m.t10y2y, -2, 2, '%', [{val:-0.5,color:'bg-amber-400'},{val:0,color:'bg-emerald-400'}]);
+
+        // ── Block 2: Chart + NFCI + HY Spread ────────────────────────────
+        renderLiquidityChart(data.netLiquidity, data.spyForChart);
+
+        var b2Stats = document.getElementById('b2-stats');
+        var b2Badges = document.getElementById('b2-badges');
+        var nfciColor  = m.nfci != null ? (m.nfci > 0.5 ? 'text-red-600' : m.nfci > 0 ? 'text-amber-500' : 'text-emerald-600') : 'text-gray-400';
+        var hyColor    = m.hySpread != null ? (m.hySpread > 4.5 ? 'text-red-600' : m.hySpread > 3.5 ? 'text-amber-500' : 'text-emerald-600') : 'text-gray-400';
+        var nlLast     = (data.netLiquidity && data.netLiquidity.length) ? data.netLiquidity[data.netLiquidity.length - 1].value : null;
+        var nlFirst    = (data.netLiquidity && data.netLiquidity.length > 1) ? data.netLiquidity[0].value : null;
+        var nlTrend    = (nlLast != null && nlFirst != null) ? (nlLast > nlFirst ? '↑ Expandiendo' : '↓ Contrayendo') : '—';
+        var nlTrendCls = (nlLast != null && nlFirst != null) ? (nlLast > nlFirst ? 'text-emerald-600' : 'text-red-600') : 'text-gray-400';
+        b2Stats.innerHTML =
+            '<div class="bg-gray-50 rounded-xl p-3"><p class="text-xs text-gray-500 mb-1">NFCI (Condiciones Financieras)</p><p class="text-lg font-bold ' + nfciColor + '">' + (m.nfci != null ? m.nfci.toFixed(3) : '—') + '</p><p class="text-xs text-gray-400">Negativo = condiciones fáciles</p></div>' +
+            '<div class="bg-gray-50 rounded-xl p-3"><p class="text-xs text-gray-500 mb-1">HY Spread (Riesgo Crédito)</p><p class="text-lg font-bold ' + hyColor + '">' + (m.hySpread != null ? m.hySpread.toFixed(2) + '%' : '—') + '</p><p class="text-xs text-gray-400">&gt;4.5% activa Modo Bunker</p></div>' +
+            '<div class="bg-gray-50 rounded-xl p-3"><p class="text-xs text-gray-500 mb-1">Liquidez Neta Fed</p><p class="text-lg font-bold ' + nlTrendCls + '">' + nlTrend + '</p><p class="text-xs text-gray-400">' + (nlLast != null ? nlLast.toFixed(0) + 'B USD' : '') + '</p></div>' +
+            '<div class="bg-gray-50 rounded-xl p-3"><p class="text-xs text-gray-500 mb-1">Curva T10Y-2Y</p><p class="text-lg font-bold ' + (m.t10y2y != null ? (m.t10y2y < 0 ? 'text-red-600' : 'text-emerald-600') : 'text-gray-400') + '">' + (m.t10y2y != null ? (m.t10y2y > 0 ? '+' : '') + m.t10y2y.toFixed(2) + '%' : '—') + '</p><p class="text-xs text-gray-400">' + (m.t10y2y != null ? (m.t10y2y < 0 ? '⚠️ Invertida' : 'Normal') : '') + '</p></div>';
+        b2Badges.innerHTML = m.bunkerMode
+            ? '<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">🛡️ Bunker Activo</span>'
+            : '<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">✅ Crédito Normal</span>';
+
+        // ── Block 3: Sector Leaders ───────────────────────────────────────
+        var leaders = data.sectorLeaders || [];
+        document.getElementById('b3-content').innerHTML = leaders.length
+            ? leaders.map(function(s){ return sectorBarHtml(s, 'rsScore', 'text-indigo-600', false); }).join('')
+            : '<p class="text-gray-400 text-sm text-center py-4">Sin datos de sectores</p>';
+
+        // ── Block 5: Sector Laggards ──────────────────────────────────────
+        var laggards = data.sectorLaggards || [];
+        document.getElementById('b5-content').innerHTML = laggards.length
+            ? laggards.map(function(s){ return sectorBarHtml(s, 'rsScore', 'text-red-500', false); }).join('')
+            : '<p class="text-gray-400 text-sm text-center py-4">Sin datos de sectores</p>';
+
+        // ── Block 4: Volume Flows ─────────────────────────────────────────
+        var fin = data.flowingIn || [];
+        var dry = data.dryingUp  || [];
+        document.getElementById('b4-flowing-in').innerHTML = fin.length
+            ? fin.map(function(a){ return flowItemHtml(a, 'in'); }).join('')
+            : '<p class="text-gray-400 text-sm">Sin señales por ahora</p>';
+        document.getElementById('b4-drying-up').innerHTML = dry.length
+            ? dry.map(function(a){ return flowItemHtml(a, 'out'); }).join('')
+            : '<p class="text-gray-400 text-sm">Sin señales por ahora</p>';
+
+        // ── Block 6: Reversions ───────────────────────────────────────────
+        var bunker = m.bunkerMode;
+        document.getElementById('bunker-badge').classList.toggle('hidden', !bunker);
+        var b6Card = document.getElementById('b6-card');
+        b6Card.style.opacity = bunker ? '0.6' : '1';
+        var opps = data.sectorOpps || [];
+        var b6Html;
+        if (bunker) {
+            b6Html = '<div class="p-4 bg-red-50 border border-red-200 rounded-xl text-center">' +
+                '<p class="text-sm font-bold text-red-700 mb-1">🛡️ MODO BUNKER ACTIVO</p>' +
+                '<p class="text-xs text-red-600">HY Spread o NFCI en zona de alerta. No es momento para buscar rebotes. Prioriza defensivos y cash.</p>' +
+            '</div>';
+        } else {
+            b6Html = opps.length
+                ? opps.map(function(s){ return sectorBarHtml(s, 'oppScore', 'text-amber-600', false); }).join('')
+                : '<p class="text-gray-400 text-sm text-center py-4">Sin datos</p>';
+        }
+        document.getElementById('b6-content').innerHTML = b6Html;
     }
 
     async function fetchAllEconomicData(force) {
