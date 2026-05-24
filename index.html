@@ -547,23 +547,18 @@
             <div class="px-6 py-5 space-y-4">
                 <div id="refuerzo-modal-error" class="hidden text-sm text-red-700 bg-red-50 border border-red-200 p-3 rounded-lg"></div>
                 <div>
-                    <label class="label">Precio actual por unidad (premium actual)</label>
-                    <input type="number" id="ref-cur-premium" placeholder="ej: 0.15" step="0.0001" class="input-field">
-                    <p class="text-xs text-gray-400 mt-1">Precio de mercado actual de la opción &nbsp;·&nbsp; 1 contrato = 100 unidades</p>
-                </div>
-                <div>
-                    <label class="label">Presupuesto de refuerzo (USD)</label>
-                    <input type="number" id="ref-budget" placeholder="ej: 500" step="0.01" class="input-field">
+                    <label class="label">Costo actual por contrato (USD)</label>
+                    <input type="number" id="ref-cur-price" placeholder="ej: 48" step="0.01" class="input-field">
+                    <p class="text-xs text-gray-400 mt-1">Precio de mercado actual por contrato (= premium &times; 100)</p>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="label">Fees de compra (nuevos contratos)</label>
+                        <label class="label">Fees de compra (refuerzo)</label>
                         <input type="number" id="ref-buy-fee" placeholder="ej: 2.50" step="0.01" class="input-field" style="background:#fffbeb">
                     </div>
                     <div>
                         <label class="label">Fees de venta (posición total)</label>
                         <input type="number" id="ref-sell-fee" placeholder="ej: 5.00" step="0.01" class="input-field" style="background:#fffbeb">
-                        <p class="text-xs text-gray-400 mt-1">Para vender TODOS los contratos</p>
                     </div>
                 </div>
                 <div class="flex gap-2 pt-1">
@@ -1240,10 +1235,9 @@
             var pos = all.find(function(p){ return p.id == posId; });
             if (!pos) return;
             refuerzoModalPos = pos;
-            document.getElementById('ref-cur-premium').value = pos.premium || '';
-            document.getElementById('ref-budget').value      = '';
-            document.getElementById('ref-buy-fee').value     = pos.entryCommissions || '';
-            document.getElementById('ref-sell-fee').value    = pos.sellCommissions  || '';
+            document.getElementById('ref-cur-price').value  = pos.premium ? (pos.premium * 100).toFixed(2) : '';
+            document.getElementById('ref-buy-fee').value    = pos.entryCommissions || '';
+            document.getElementById('ref-sell-fee').value   = pos.sellCommissions  || '';
             document.getElementById('refuerzo-modal-error').classList.add('hidden');
             document.getElementById('refuerzo-modal-result-container').classList.add('hidden');
             var typeLabel = pos.tipo === 'call' ? '📈 Call' : '📉 Put';
@@ -1268,41 +1262,37 @@
 
     function calcularRefuerzoModal() {
         if (!refuerzoModalPos) return;
-        var pos     = refuerzoModalPos;
-        var curPrem = parseFloat(document.getElementById('ref-cur-premium').value);
-        var budget  = parseFloat(document.getElementById('ref-budget').value);
-        var buyFee  = parseFloat(document.getElementById('ref-buy-fee').value)  || 0;
-        var sellFee = parseFloat(document.getElementById('ref-sell-fee').value) || 0;
-        var errEl   = document.getElementById('refuerzo-modal-error');
+        var pos      = refuerzoModalPos;
+        var curPrice = parseFloat(document.getElementById('ref-cur-price').value);  // per contract
+        var buyFee   = parseFloat(document.getElementById('ref-buy-fee').value)  || 0;
+        var sellFee  = parseFloat(document.getElementById('ref-sell-fee').value) || 0;
+        var errEl    = document.getElementById('refuerzo-modal-error');
         errEl.classList.add('hidden');
-        if (isNaN(curPrem) || curPrem <= 0 || isNaN(budget) || budget <= 0) {
-            errEl.textContent = 'Ingresa el precio actual por unidad y el presupuesto de refuerzo.';
+        if (isNaN(curPrice) || curPrice <= 0) {
+            errEl.textContent = 'Ingresa el costo actual por contrato.';
             errEl.classList.remove('hidden'); return;
         }
-        var costPerContract = curPrem * 100;
-        var newCtrs = Math.floor((budget - buyFee) / costPerContract);
-        if (newCtrs <= 0) {
-            errEl.textContent = 'El presupuesto no alcanza para comprar ningún contrato a ese precio (revisa los fees).';
-            errEl.classList.remove('hidden'); return;
-        }
-        var actualSpend      = newCtrs * costPerContract + buyFee;
-        var totalCtrs        = pos.contracts + newCtrs;
-        var totalInvestment  = pos.totalCostBasis + actualSpend;
-        var newAvgPerUnit    = totalInvestment / (totalCtrs * 100);
-        var breakevenPerUnit = (totalInvestment + sellFee) / (totalCtrs * 100);
+        // Same math as the Refuerzo tab
+        var inv       = pos.totalCostBasis;
+        var ctrs      = pos.contracts;
+        var newCtrs   = Math.round(inv / curPrice);
+        var newInv    = newCtrs * curPrice + buyFee;
+        var totalCtrs = ctrs + newCtrs;
+        var totalInv  = inv + newInv;
+        var avgPrice  = totalInv / totalCtrs;              // new avg per contract
+        var bePerCtrt = (totalInv + sellFee) / totalCtrs; // breakeven per contract
         document.getElementById('refuerzo-modal-result').innerHTML =
-            '<div class="grid grid-cols-2 gap-3 mb-3">' +
-                '<div class="bg-gray-50 border rounded-xl p-3 text-center"><p class="text-xs text-gray-400 mb-0.5">Contratos a Comprar</p><p class="text-2xl font-extrabold text-indigo-600">' + newCtrs + '</p></div>' +
-                '<div class="bg-gray-50 border rounded-xl p-3 text-center"><p class="text-xs text-gray-400 mb-0.5">Inversión Adicional</p><p class="text-2xl font-extrabold text-indigo-600">' + fmt(actualSpend) + '</p>' + (buyFee > 0 ? '<p class="text-xs text-gray-400">incl. ' + fmt(buyFee) + ' fees compra</p>' : '') + '</div>' +
+            '<div class="grid grid-cols-2 gap-4 mb-4">' +
+                '<div class="bg-gray-50 rounded-xl p-4 text-center border border-gray-100"><p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Contratos a Reforzar</p><p class="text-3xl font-bold text-indigo-600">' + newCtrs + '</p></div>' +
+                '<div class="bg-gray-50 rounded-xl p-4 text-center border border-gray-100"><p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Inversión Adicional</p><p class="text-3xl font-bold text-indigo-600">' + fmt(newInv) + '</p>' + (buyFee > 0 ? '<p class="text-xs text-gray-400 mt-0.5">incl. ' + fmt(buyFee) + ' fees</p>' : '') + '</div>' +
             '</div>' +
-            '<div class="border border-indigo-100 bg-indigo-50 rounded-xl p-4">' +
-                '<p class="text-xs font-bold text-indigo-700 uppercase tracking-widest mb-3">Posición Combinada</p>' +
+            '<div class="bg-indigo-50 rounded-xl p-4 border border-indigo-100">' +
+                '<p class="text-xs font-bold text-indigo-700 uppercase tracking-wide mb-3">Posición Resultante</p>' +
                 '<div class="space-y-2 text-sm">' +
-                    '<div class="flex justify-between"><span class="text-gray-600">Contratos totales:</span><span class="font-bold">' + totalCtrs + '</span></div>' +
-                    '<div class="flex justify-between"><span class="text-gray-600">Inversión total:</span><span class="font-bold">' + fmt(totalInvestment) + '</span></div>' +
-                    '<div class="flex justify-between"><span class="text-gray-600">Nuevo costo prom / unidad:</span><span class="font-bold font-mono">' + newAvgPerUnit.toFixed(4) + '</span></div>' +
-                    '<div class="flex justify-between border-t pt-2 mt-1 font-bold text-indigo-700"><span>Breakeven (c/fees venta):</span><span class="font-mono">' + breakevenPerUnit.toFixed(4) + ' / u</span></div>' +
-                    '<div class="flex justify-between text-xs text-gray-400"><span>= por contrato:</span><span class="font-mono">' + fmt(breakevenPerUnit * 100) + '</span></div>' +
+                    '<div class="flex justify-between"><span class="text-gray-600">Contratos Totales:</span><span class="font-bold">' + totalCtrs + '</span></div>' +
+                    '<div class="flex justify-between"><span class="text-gray-600">Inversión Total:</span><span class="font-bold">' + fmt(totalInv) + '</span></div>' +
+                    '<div class="flex justify-between border-t pt-2 mt-2 font-bold text-indigo-700"><span>Nuevo Costo Promedio:</span><span>' + fmt(avgPrice) + ' / ctrt</span></div>' +
+                    (sellFee > 0 ? '<div class="flex justify-between text-xs text-gray-500 pt-1"><span>Breakeven (c/fees venta):</span><span class="font-mono">' + fmt(bePerCtrt) + ' / ctrt</span></div>' : '') +
                 '</div>' +
             '</div>';
         document.getElementById('refuerzo-modal-result-container').classList.remove('hidden');
