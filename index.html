@@ -1327,6 +1327,8 @@
             var raw = localStorage.getItem('marketDataCache');
             if (!raw) return null;
             var c = JSON.parse(raw);
+            // v2 cache check: bust old cache that lacks the new market fields
+            if (!c.data || !c.data.macro || c.data.v !== 2) { localStorage.removeItem('marketDataCache'); return null; }
             var today = new Date().toISOString().split('T')[0];
             if (c.date !== today || c.slot !== getMarketSlot()) return null;
             return c;

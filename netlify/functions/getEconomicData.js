@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+﻿const fetch = require('node-fetch');
 
 exports.handler = async function(event, context) {
     const FRED_API_KEY    = process.env.FRED_API_KEY;
@@ -25,19 +25,24 @@ exports.handler = async function(event, context) {
 
     function finnhubCandle(symbol, days) {
         const to   = Math.floor(Date.now() / 1000);
-        const from = to - (days || 260) * 86400;
+        const from = to - (days || 220) * 86400;
         return finnBase + '/stock/candle?symbol=' + symbol + '&resolution=D&from=' + from + '&to=' + to + '&token=' + FINNHUB_API_KEY;
     }
 
-    const emptyObs  = { observations: [{ value: 'N/A', date: '-' }] };
-    const emptyObs0 = { observations: [] };
+    const SECTORS   = ['XLK','XLC','XLF','XLV','XLY','XLP','XLI','XLE','XLU','XLRE','XLB'];
+    const WATCHLIST = ['AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','AVGO','AMD',
+                       'JPM','BAC','WMT','XOM','LLY','GLD','USO','URA','GDX','PLTR','QQQ'];
+    const emptyObs    = { observations: [{ value: 'N/A', date: '-' }] };
+    const emptyObs0   = { observations: [] };
+    const emptyCandle = { s: 'no_data' };
+    const todayStr    = new Date().toISOString().split('T')[0];
+    const to90Str     = new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0];
+    const to7Str      = new Date(Date.now() +  7 * 86400000).toISOString().split('T')[0];
 
-    // ── Phase 1: FRED macro + existing data (parallel) ──────────────────
-    const [
-        unemployment, inflation, fedfunds,
-        walcl, wtregen, rrp,
-        nfci, hySpread, t10y2y, vix, dxy
-    ] = await Promise.all([
+    // ONE parallel phase: FRED + all candles + calendars
+    const allSymbols = ['SPY', ...SECTORS, ...WATCHLIST];
+    const allResults = await Promise.all([
+        // FRED macro (11)
         safeFetch(fredUrl('UNRATE'),              emptyObs),
         safeFetch(fredUrl('CPIAUCSL', 1, 'pc1'),  emptyObs),
         safeFetch(fredUrl('FEDFUNDS'),            emptyObs),
@@ -49,29 +54,45 @@ exports.handler = async function(event, context) {
         safeFetch(fredUrl('T10Y2Y',       5),     emptyObs0),
         safeFetch(fredUrl('VIXCLS',       5),     emptyObs0),
         safeFetch(fredUrl('DTWEXBGS',     5),     emptyObs0),
+        // Finnhub calendars (2)
+        safeFetch(finnBase + '/calendar/economic?from=' + todayStr + '&to=' + to90Str + '&token=' + FINNHUB_API_KEY, { economicCalendar: [] }),
+        safeFetch(finnBase + '/calendar/earnings?from=' + todayStr + '&to=' + to7Str  + '&token=' + FINNHUB_API_KEY, { earningsCalendar: [] }),
+        // Candles: SPY + 11 sectors + 20 watchlist (32)
+        ...allSymbols.map(sym => safeFetch(finnhubCandle(sym), emptyCandle)),
     ]);
 
-    // ── Phase 2: Finnhub candles ─────────────────────────────────────────
-    const SECTORS   = ['XLK','XLC','XLF','XLV','XLY','XLP','XLI','XLE','XLU','XLRE','XLB'];
-    const WATCHLIST = ['AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','AVGO','AMD',
-                       'JPM','BAC','WMT','XOM','LLY','GLD','USO','URA','GDX','PLTR','QQQ'];
-    const emptyCandle = { s: 'no_data' };
+    const [unemployment, inflation, fedfunds,
+           walcl, wtregen, rrp,
+           nfci, hySpread, t10y2y, vixFred, dxy,
+           finnhubEcoData, earningsRaw,
+           ...candleResults] = allResults;
 
-    const candleResults = await Promise.all(
-        ['SPY', ...SECTORS, ...WATCHLIST].map(sym => safeFetch(finnhubCandle(sym), emptyCandle))
-    );
     const spyCandle     = candleResults[0];
     const sectorCandles = candleResults.slice(1, 1 + SECTORS.length);
     const watchCandles  = candleResults.slice(1 + SECTORS.length);
+
+    // Earnings enrichment (depends on earningsRaw — sequential but fast)
+    const earningsList = (earningsRaw.earningsCalendar || []).slice(0, 15);
+    const uniqueSyms   = [...new Set(earningsList.map(e => e.symbol))].slice(0, 10);
+    const searches     = await Promise.all(
+        uniqueSyms.map(sym => safeFetch(finnBase + '/search?q=' + encodeURIComponent(sym) + '&token=' + FINNHUB_API_KEY, { result: [] }))
+    );
+    const nameMap = {};
+    searches.forEach((res, i) => {
+        const sym   = uniqueSyms[i];
+        const match = (res.result || []).find(r => r.symbol === sym || r.displaySymbol === sym);
+        nameMap[sym] = match ? match.description : '';
+    });
+    const finnhubEarningsData = { earningsCalendar: earningsList.map(e => ({ ...e, companyName: nameMap[e.symbol] || '' })) };
 
     // ── Candle metric extractor ──────────────────────────────────────────
     function computeMetrics(c) {
         if (!c || c.s !== 'ok' || !c.c || c.c.length < 22) return null;
         const cl = c.c, vl = c.v, n = cl.length;
         const latest = cl[n - 1];
-        const d1m  = cl[n - 22];
-        const d3m  = n >= 64  ? cl[n - 64]  : null;
-        const d5   = cl[n - 6];
+        const d1m    = cl[n - 22];
+        const d3m    = n >= 64  ? cl[n - 64]  : null;
+        const d5     = n >= 6   ? cl[n - 6]   : null;
         const sma50  = n >= 50  ? cl.slice(n - 50).reduce((a, b) => a + b, 0) / 50   : null;
         const sma200 = n >= 200 ? cl.slice(n - 200).reduce((a, b) => a + b, 0) / 200 : null;
         const vol5d  = vl.slice(n - 5).reduce((a, b) => a + b, 0) / 5;
@@ -81,12 +102,12 @@ exports.handler = async function(event, context) {
         return {
             latest,
             perf1m:   ((latest - d1m) / d1m) * 100,
-            perf3m:   d3m  != null ? ((latest - d3m)  / d3m)  * 100 : null,
-            perf5d:   d5   != null ? ((latest - d5)   / d5)   * 100 : null,
+            perf3m:   d3m  != null ? ((latest - d3m) / d3m) * 100 : null,
+            perf5d:   d5   != null ? ((latest - d5)  / d5)  * 100 : null,
             dist50:   sma50  ? ((latest - sma50)  / sma50)  * 100 : null,
             dist200:  sma200 ? ((latest - sma200) / sma200) * 100 : null,
-            volTrend: vol20d > 0 ? vol5d  / vol20d : null,
-            volSpike: vol30d > 0 ? vol3d  / vol30d : null,
+            volTrend: vol20d > 0 ? vol5d / vol20d : null,
+            volSpike: vol30d > 0 ? vol3d / vol30d : null,
         };
     }
 
@@ -94,40 +115,35 @@ exports.handler = async function(event, context) {
         if (val == null) return 50;
         const sorted = arr.filter(v => v != null).sort((a, b) => a - b);
         if (sorted.length < 2) return 50;
-        const below = sorted.filter(v => v < val).length;
-        return (below / (sorted.length - 1)) * 100;
+        return (sorted.filter(v => v < val).length / (sorted.length - 1)) * 100;
     }
 
     // ── Score sectors ────────────────────────────────────────────────────
-    const spyM  = computeMetrics(spyCandle);
+    const spyM       = computeMetrics(spyCandle);
     const rawSectors = SECTORS.map((sym, i) => {
         const m = computeMetrics(sectorCandles[i]);
         if (!m) return null;
-        return { sym, ...m, relVsSpy3m: (m.perf3m != null && spyM) ? m.perf3m - spyM.perf3m : null };
+        return { sym, ...m, relVsSpy3m: (m.perf3m != null && spyM && spyM.perf3m != null) ? m.perf3m - spyM.perf3m : null };
     }).filter(Boolean);
 
-    const fields = { relVsSpy3m: rawSectors.map(s => s.relVsSpy3m), perf1m: rawSectors.map(s => s.perf1m),
-                     perf3m: rawSectors.map(s => s.perf3m), perf5d: rawSectors.map(s => s.perf5d),
-                     volTrend: rawSectors.map(s => s.volTrend), volSpike: rawSectors.map(s => s.volSpike),
-                     dist50:   rawSectors.map(s => s.dist50),   dist200:  rawSectors.map(s => s.dist200) };
-
-    const scoredSectors = rawSectors.map(s => {
-        const rsScore = pctRank(fields.relVsSpy3m, s.relVsSpy3m) * 0.35
-                      + pctRank(fields.perf1m,    s.perf1m)     * 0.25
-                      + pctRank(fields.volTrend,  s.volTrend)   * 0.20
-                      + pctRank(fields.dist50,    s.dist50)     * 0.10
-                      + pctRank(fields.dist200,   s.dist200)    * 0.10;
-        const oppScore = (100 - pctRank(fields.perf3m, s.perf3m)) * 0.40
-                       + pctRank(fields.volSpike, s.volSpike) * 0.30
-                       + pctRank(fields.perf5d,   s.perf5d)   * 0.30;
-        return { sym: s.sym, latest: s.latest, perf1m: s.perf1m, perf3m: s.perf3m,
-                 relVsSpy3m: s.relVsSpy3m, volTrend: s.volTrend,
-                 rsScore: Math.round(rsScore), oppScore: Math.round(oppScore) };
-    });
-    const byRS  = [...scoredSectors].sort((a, b) => b.rsScore - a.rsScore);
+    if (rawSectors.length > 0) {
+        const F = { relVsSpy3m: rawSectors.map(s => s.relVsSpy3m), perf1m: rawSectors.map(s => s.perf1m),
+                    perf3m: rawSectors.map(s => s.perf3m), perf5d: rawSectors.map(s => s.perf5d),
+                    volTrend: rawSectors.map(s => s.volTrend), volSpike: rawSectors.map(s => s.volSpike),
+                    dist50: rawSectors.map(s => s.dist50), dist200: rawSectors.map(s => s.dist200) };
+        var scoredSectors = rawSectors.map(s => ({
+            sym: s.sym, latest: s.latest, perf1m: s.perf1m, perf3m: s.perf3m,
+            relVsSpy3m: s.relVsSpy3m, volTrend: s.volTrend,
+            rsScore:  Math.round(pctRank(F.relVsSpy3m, s.relVsSpy3m) * 0.35 + pctRank(F.perf1m, s.perf1m) * 0.25 + pctRank(F.volTrend, s.volTrend) * 0.20 + pctRank(F.dist50, s.dist50) * 0.10 + pctRank(F.dist200, s.dist200) * 0.10),
+            oppScore: Math.round((100 - pctRank(F.perf3m, s.perf3m)) * 0.40 + pctRank(F.volSpike, s.volSpike) * 0.30 + pctRank(F.perf5d, s.perf5d) * 0.30),
+        }));
+    } else {
+        var scoredSectors = [];
+    }
+    const byRS  = [...scoredSectors].sort((a, b) => b.rsScore  - a.rsScore);
     const byOpp = [...scoredSectors].sort((a, b) => b.oppScore - a.oppScore);
 
-    // ── Volume flows (watchlist) ─────────────────────────────────────────
+    // ── Volume flows ─────────────────────────────────────────────────────
     const flowAssets = WATCHLIST.map((sym, i) => {
         const c = watchCandles[i];
         if (!c || c.s !== 'ok' || !c.c || c.c.length < 21) return null;
@@ -138,34 +154,33 @@ exports.handler = async function(event, context) {
         const chg    = cl.length >= 2 ? ((cl[n-1] - cl[n-2]) / cl[n-2]) * 100 : 0;
         return { sym, volRatio: Math.round(ratio * 100) / 100, priceChg: Math.round(chg * 100) / 100, price: cl[n-1] };
     }).filter(Boolean);
-
     const flowingIn = flowAssets.filter(a => a.volRatio > 1.5 && a.priceChg > 0).sort((a, b) => b.volRatio - a.volRatio).slice(0, 8);
     const dryingUp  = flowAssets.filter(a => a.volRatio < 0.6).sort((a, b) => a.volRatio - b.volRatio).slice(0, 8);
 
-    // ── Net Liquidity series ─────────────────────────────────────────────
-    function parseObs(obs) {
+    // ── Net Liquidity (units: billions USD) ──────────────────────────────
+    // WALCL = millions, WTREGEN = millions, RRPONTSYD = billions
+    function parseObs(obs, toB) {
         return (obs || []).filter(o => o.value !== '.' && o.value !== 'N/A')
-            .map(o => ({ date: o.date, val: parseFloat(o.value) })).reverse();
+            .map(o => ({ date: o.date, val: parseFloat(o.value) * (toB ? 0.001 : 1) })).reverse();
     }
     function forwardFill(series, targetDate) {
-        for (let i = series.length - 1; i >= 0; i--) {
-            if (series[i].date <= targetDate) return series[i].val;
-        }
+        for (let i = series.length - 1; i >= 0; i--) { if (series[i].date <= targetDate) return series[i].val; }
         return series.length ? series[0].val : 0;
     }
-    const walclS = parseObs(walcl.observations);
-    const tgaS   = parseObs(wtregen.observations);
-    const rrpS   = parseObs(rrp.observations);
+    // Convert WALCL and WTREGEN from millions to billions (divide by 1000); RRPONTSYD already in billions
+    const walclS = parseObs(walcl.observations,   true);
+    const tgaS   = parseObs(wtregen.observations, true);
+    const rrpS   = parseObs(rrp.observations,     false);
     const netLiquidity = walclS.slice(-120).map(w => ({
-        date: w.date,
-        value: Math.round((w.val - forwardFill(tgaS, w.date) - forwardFill(rrpS, w.date)) * 10) / 10
+        date:  w.date,
+        value: Math.round((w.val - forwardFill(tgaS, w.date) - forwardFill(rrpS, w.date)) * 10) / 10,
     }));
 
     const spyForChart = spyCandle && spyCandle.s === 'ok'
         ? spyCandle.t.map((t, i) => ({ date: new Date(t * 1000).toISOString().split('T')[0], value: spyCandle.c[i] })).slice(-120)
         : [];
 
-    // ── Latest macro single values ───────────────────────────────────────
+    // ── Macro single values ───────────────────────────────────────────────
     function latestVal(obs) {
         const valid = (obs || []).filter(o => o.value !== '.' && o.value !== 'N/A');
         return valid.length ? parseFloat(valid[0].value) : null;
@@ -176,31 +191,10 @@ exports.handler = async function(event, context) {
         nfci:       nfciVal,
         hySpread:   hySpreadVal,
         t10y2y:     latestVal(t10y2y.observations),
-        vix:        latestVal(vix.observations),
+        vix:        latestVal(vixFred.observations),
         dxy:        latestVal(dxy.observations),
         bunkerMode: (hySpreadVal != null && hySpreadVal > 4.5) || (nfciVal != null && nfciVal > 0.5),
     };
-
-    // ── Finnhub calendars (existing) ─────────────────────────────────────
-    const todayStr = new Date().toISOString().split('T')[0];
-    const to90Str  = new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0];
-    const to7Str   = new Date(Date.now() +  7 * 86400000).toISOString().split('T')[0];
-    const [finnhubEcoData, earningsRaw] = await Promise.all([
-        safeFetch(finnBase + '/calendar/economic?from=' + todayStr + '&to=' + to90Str + '&token=' + FINNHUB_API_KEY, { economicCalendar: [] }),
-        safeFetch(finnBase + '/calendar/earnings?from='  + todayStr + '&to=' + to7Str  + '&token=' + FINNHUB_API_KEY, { earningsCalendar: [] }),
-    ]);
-    const earningsList = (earningsRaw.earningsCalendar || []).slice(0, 15);
-    const syms = [...new Set(earningsList.map(e => e.symbol))].slice(0, 12);
-    const searches = await Promise.all(
-        syms.map(sym => safeFetch(finnBase + '/search?q=' + encodeURIComponent(sym) + '&token=' + FINNHUB_API_KEY, { result: [] }))
-    );
-    const nameMap = {};
-    searches.forEach((res, i) => {
-        const sym = syms[i];
-        const match = (res.result || []).find(r => r.symbol === sym || r.displaySymbol === sym);
-        nameMap[sym] = match ? match.description : '';
-    });
-    const finnhubEarningsData = { earningsCalendar: earningsList.map(e => ({ ...e, companyName: nameMap[e.symbol] || '' })) };
 
     return {
         statusCode: 200,
@@ -221,68 +215,7 @@ exports.handler = async function(event, context) {
             flowingIn,
             dryingUp,
             generatedAt: new Date().toISOString(),
-        })
+            v: 2,
+        }),
     };
 };
-
-
-    const fredBaseUrl      = `https://api.stlouisfed.org/fred/series/observations`;
-    const commonFredParams = `api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=1`;
-    const unemploymentUrl  = `${fredBaseUrl}?series_id=UNRATE&${commonFredParams}`;
-    const inflationUrl     = `${fredBaseUrl}?series_id=CPIAUCSL&${commonFredParams}&units=pc1`;
-    const fedfundsUrl      = `${fredBaseUrl}?series_id=FEDFUNDS&${commonFredParams}`;
-
-    const today   = new Date();
-    const from    = today.toISOString().split('T')[0];
-    const to90    = new Date(today.getTime() + 90 * 86400000).toISOString().split('T')[0];
-    const to7     = new Date(today.getTime() +  7 * 86400000).toISOString().split('T')[0];
-    const finnhubEcoUrl      = `https://finnhub.io/api/v1/calendar/economic?from=${from}&to=${to90}&token=${FINNHUB_API_KEY}`;
-    const finnhubEarningsUrl = `https://finnhub.io/api/v1/calendar/earnings?from=${from}&to=${to7}&token=${FINNHUB_API_KEY}`;
-
-    // Fetch each source independently so one failure doesn't break the rest
-    async function safeFetch(url, fallback) {
-        try {
-            const res = await fetch(url);
-            if (!res.ok) { console.warn(`safeFetch non-OK ${res.status}: ${url}`); return fallback; }
-            return await res.json();
-        } catch(e) {
-            console.warn(`safeFetch error for ${url}:`, e.message);
-            return fallback;
-        }
-    }
-
-    const [unemploymentData, inflationData, fedfundsData, finnhubEcoData, finnhubEarningsRaw] = await Promise.all([
-        safeFetch(unemploymentUrl,    { observations: [{ value: 'N/A', date: '—' }] }),
-        safeFetch(inflationUrl,       { observations: [{ value: 'N/A', date: '—' }] }),
-        safeFetch(fedfundsUrl,        { observations: [{ value: 'N/A', date: '—' }] }),
-        safeFetch(finnhubEcoUrl,      { economicCalendar: [] }),
-        safeFetch(finnhubEarningsUrl, { earningsCalendar: [] })
-    ]);
-
-    // Enrich earnings with company names via /search (broader coverage than profile2)
-    const earningsList = (finnhubEarningsRaw.earningsCalendar || []).slice(0, 15);
-    const symbols = [...new Set(earningsList.map(e => e.symbol))].slice(0, 12);
-    const searches = await Promise.all(
-        symbols.map(sym =>
-            safeFetch(
-                `https://finnhub.io/api/v1/search?q=${encodeURIComponent(sym)}&token=${FINNHUB_API_KEY}`,
-                { count: 0, result: [] }
-            )
-        )
-    );
-    const nameMap = {};
-    searches.forEach((res, i) => {
-        const sym = symbols[i];
-        const match = (res.result || []).find(r => r.symbol === sym || r.displaySymbol === sym);
-        nameMap[sym] = match ? match.description : '';
-    });
-    const enrichedEarnings = earningsList.map(e => ({ ...e, companyName: nameMap[e.symbol] || '' }));
-    const finnhubEarningsData = { earningsCalendar: enrichedEarnings };
-
-    return {
-        statusCode: 200,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ unemploymentData, inflationData, fedfundsData, finnhubEcoData, finnhubEarningsData })
-    };
-};
-
