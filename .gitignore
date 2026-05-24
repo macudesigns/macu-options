@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Netlify build output
+.netlify/
+
+# Environment variables — NEVER commit API keys
+.env
+.env.local
+.env*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+*.swp
+*.swo

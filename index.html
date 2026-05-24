@@ -1,0 +1,1081 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MacuOptions Trader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        html, body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .results-table th, .results-table td { padding: 0.6rem 0.9rem; text-align: left; white-space: nowrap; }
+        .pos-card { transition: box-shadow 0.15s ease; }
+        .pos-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.09); }
+        .input-field {
+            width: 100%; background: #f8fafc; border: 1.5px solid #e2e8f0;
+            border-radius: 0.5rem; padding: 0.625rem 0.75rem; font-size: 0.875rem;
+            outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .input-field:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); background: #fff; }
+        .label { display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.375rem; }
+        .stat-card { background: #fff; border-radius: 0.875rem; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1.5px solid #f1f5f9; text-align: center; }
+        .btn-primary { background: #4f46e5; color: #fff; font-weight: 700; padding: 0.75rem 1rem; border-radius: 0.625rem; box-shadow: 0 2px 8px rgba(79,70,229,0.25); transition: background 0.15s; border: none; cursor: pointer; width: 100%; font-size: 0.9rem; }
+        .btn-primary:hover { background: #4338ca; }
+        .btn-success { background: #059669; color: #fff; font-weight: 700; padding: 0.75rem 1rem; border-radius: 0.625rem; box-shadow: 0 2px 8px rgba(5,150,105,0.2); transition: background 0.15s; border: none; cursor: pointer; width: 100%; font-size: 0.9rem; }
+        .btn-success:hover { background: #047857; }
+        .card { background: #fff; border-radius: 0.875rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1.5px solid #f1f5f9; padding: 1.5rem; }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <!-- HEADER -->
+    <header class="bg-slate-900 text-white shadow-xl sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight leading-tight">MacuOptions Trader</h1>
+                    <p class="text-slate-400 text-xs leading-tight hidden sm:block">Analizador &amp; Diario de Opciones</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div id="hdr-open-counter" class="hidden items-center gap-2 bg-slate-800 rounded-lg px-3 py-1.5 border border-slate-700">
+                    <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                    <span class="text-sm text-slate-300 font-medium"><span id="hdr-open-count">0</span> abiertas</span>
+                </div>
+                <button id="btn-login" onclick="loginWithGoogle()" class="flex items-center gap-2 bg-white text-gray-800 font-semibold text-xs px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                    Iniciar Sesión
+                </button>
+                <div id="hdr-user" class="hidden items-center gap-2">
+                    <img id="hdr-avatar" src="" class="w-8 h-8 rounded-full border-2 border-indigo-400" alt="avatar">
+                    <span id="hdr-name" class="text-xs text-slate-300 hidden sm:block max-w-xs truncate"></span>
+                    <button onclick="logoutUser()" class="text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-slate-700">Salir</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+
+        <!-- TAB NAV -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-1.5 flex flex-wrap gap-1 mb-6">
+            <button data-tab="#analisis"  class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all bg-indigo-50 text-indigo-700">📊 Análisis</button>
+            <button data-tab="#diario"    class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">📁 Diario</button>
+            <button data-tab="#noticias"  class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">📈 Mercado</button>
+            <button data-tab="#checklist" class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">✅ Checklist</button>
+            <button data-tab="#refuerzo"  class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">🔧 Refuerzo</button>
+        </div>
+
+        <main>
+
+            <!-- TAB: ANÁLISIS -->
+            <div id="analisis" class="tab-content active">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                    <!-- LEFT: Form -->
+                    <div class="card">
+                        <h2 class="text-base font-bold text-gray-900 mb-5 pb-3 border-b">⚙️ Parámetros de la Operación</h2>
+                        <form id="optionsForm" class="space-y-4">
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="label">Ticker / Símbolo</label>
+                                    <input type="text" id="ticker" placeholder="AAPL, SPY…" class="input-field font-mono" oninput="this.value=this.value.toUpperCase()">
+                                </div>
+                                <div>
+                                    <label class="label">Tipo de Opción</label>
+                                    <select id="tipo" class="input-field">
+                                        <option value="call">📈 Call (Compra)</option>
+                                        <option value="put">📉 Put (Venta)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="label">Precio Strike</label>
+                                    <input type="number" id="strike" placeholder="ej: 185.00" step="0.01" class="input-field">
+                                </div>
+                                <div>
+                                    <label class="label">Fecha de Expiración</label>
+                                    <input type="date" id="expiration" class="input-field">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="label">Nº de Contratos</label>
+                                    <input type="number" id="contracts" placeholder="ej: 10" min="1" class="input-field">
+                                </div>
+                                <div>
+                                    <label class="label">Precio Ask / Unidad</label>
+                                    <input type="number" id="premium" placeholder="ej: 0.45" step="any" class="input-field">
+                                </div>
+                            </div>
+
+                            <div class="bg-indigo-50 border border-indigo-100 rounded-lg px-4 py-2.5 flex items-center justify-between">
+                                <span class="text-sm text-indigo-700 font-medium">Costo por Contrato (× 100):</span>
+                                <span id="premiumRealValue" class="text-base font-bold text-indigo-800 font-mono">—</span>
+                            </div>
+
+                            <!-- Fees Section -->
+                            <div class="bg-amber-50 border border-amber-100 rounded-xl p-4">
+                                <p class="text-xs font-bold text-amber-800 uppercase tracking-wide mb-3">💰 Comisiones &amp; Fees del Broker</p>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="label" style="color:#92400e">Fees de Entrada (USD)</label>
+                                        <input type="number" id="entryCommissions" placeholder="ej: 2.50" step="0.01" class="input-field" style="background:#fffbeb">
+                                    </div>
+                                    <div>
+                                        <label class="label" style="color:#92400e">Fees de Salida / Venta (USD)</label>
+                                        <input type="number" id="sellCommissions" placeholder="ej: 2.50" step="0.01" class="input-field" style="background:#fffbeb">
+                                    </div>
+                                </div>
+                                <p class="text-xs text-amber-600 mt-2">Ambos fees se incluyen en el cálculo del precio de venta objetivo.</p>
+                            </div>
+
+                            <!-- Optimal Price Range -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="label mb-0">Rango de Precio Óptimo (por Contrato)</label>
+                                    <a href="https://docs.google.com/spreadsheets/d/1JH-nYSubRs6eznGMjl-gjCE3P6NEo_utrI2zPDci1LM/edit?gid=0#gid=0" target="_blank" class="text-xs text-indigo-600 hover:underline font-medium">Ver Listado →</a>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="label" style="font-size:0.65rem">Mínimo ($)</label>
+                                        <input type="number" id="optimalPriceMin" placeholder="ej: 30" step="any" class="input-field">
+                                    </div>
+                                    <div>
+                                        <label class="label" style="font-size:0.65rem">Máximo ($)</label>
+                                        <input type="number" id="optimalPriceMax" placeholder="ej: 45" step="any" class="input-field">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="label">Objetivo de Ganancia</label>
+                                <select id="targetProfitPercentage" class="input-field">
+                                    <option value="0.10">10%</option>
+                                    <option value="0.25">25%</option>
+                                    <option value="0.35" selected>35%</option>
+                                    <option value="0.50">50%</option>
+                                    <option value="0.75">75%</option>
+                                    <option value="1.0">100%</option>
+                                    <option value="1.5">150%</option>
+                                    <option value="2.0">200%</option>
+                                </select>
+                            </div>
+
+                            <button type="button" onclick="calcular()" class="btn-primary flex items-center justify-center gap-2 mt-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                Analizar Operación
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- RIGHT: Results -->
+                    <div id="result-container" class="card hidden">
+                        <h2 class="text-base font-bold text-gray-900 mb-4 pb-3 border-b">📊 Análisis de Resultados</h2>
+                        <div id="result" class="space-y-4"></div>
+                        <div id="error-message" class="mt-4"></div>
+                        <div id="save-to-journal-section" class="mt-5 pt-4 border-t hidden">
+                            <button type="button" onclick="saveToJournal()" id="save-btn" class="btn-success flex items-center justify-center gap-2" style="display:none">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                                Guardar en Diario de Posiciones
+                            </button>
+                            <button type="button" onclick="loginWithGoogle()" id="save-login-btn" class="btn-primary flex items-center justify-center gap-2" style="display:none">
+                                🔑 Inicia sesión con Google para guardar en el Diario
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profit Table -->
+                <div id="table-section" class="mt-6 card hidden">
+                    <h2 class="text-base font-bold text-gray-900 mb-4">Tabla de Referencia de Ganancias</h2>
+                    <div id="table-container" class="overflow-x-auto"></div>
+                </div>
+            </div>
+
+            <!-- TAB: DIARIO -->
+            <div id="diario" class="tab-content">
+
+                <!-- Login wall -->
+                <div id="journal-login-wall" class="hidden text-center py-20 bg-white rounded-xl shadow-sm border border-gray-100">
+                    <div class="text-6xl mb-4">🔒</div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Diario Privado</h3>
+                    <p class="text-gray-400 text-sm mb-6">Inicia sesión con Google para ver y gestionar tu historial de operaciones.</p>
+                    <button onclick="loginWithGoogle()" class="inline-flex items-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors">
+                        🔑 Iniciar sesión con Google
+                    </button>
+                </div>
+
+                <div id="journal-content" class="hidden">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-5">
+                    <div class="stat-card"><p class="text-3xl font-bold text-gray-800" id="stat-total">0</p><p class="text-xs text-gray-400 mt-1 uppercase tracking-wide font-semibold">Total</p></div>
+                    <div class="stat-card border-amber-100"><p class="text-3xl font-bold text-amber-500" id="stat-open">0</p><p class="text-xs text-gray-400 mt-1 uppercase tracking-wide font-semibold">Abiertas</p></div>
+                    <div class="stat-card border-emerald-100"><p class="text-3xl font-bold text-emerald-500" id="stat-wins">0</p><p class="text-xs text-gray-400 mt-1 uppercase tracking-wide font-semibold">Ganadas ✅</p></div>
+                    <div class="stat-card border-red-100"><p class="text-3xl font-bold text-red-500" id="stat-losses">0</p><p class="text-xs text-gray-400 mt-1 uppercase tracking-wide font-semibold">Perdidas ❌</p></div>
+                    <div class="stat-card" id="stat-pnl-card"><p class="text-2xl font-bold" id="stat-pnl">$0</p><p class="text-xs text-gray-400 mt-1 uppercase tracking-wide font-semibold">P&amp;L Neto Est.</p></div>
+                </div>
+
+                <div id="winrate-section" class="hidden card mb-5">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-bold text-gray-700">Win Rate (posiciones cerradas)</span>
+                        <span class="text-xl font-bold text-indigo-600" id="stat-winrate">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2.5">
+                        <div id="winrate-bar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-700" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2 mb-5">
+                    <button onclick="filterPositions('all')"  id="filter-all"  class="filter-btn px-4 py-1.5 rounded-full text-sm font-bold bg-indigo-600 text-white">Todas</button>
+                    <button onclick="filterPositions('open')" id="filter-open" class="filter-btn px-4 py-1.5 rounded-full text-sm font-bold bg-white text-gray-500 border border-gray-200 hover:border-gray-300">Abiertas</button>
+                    <button onclick="filterPositions('win')"  id="filter-win"  class="filter-btn px-4 py-1.5 rounded-full text-sm font-bold bg-white text-gray-500 border border-gray-200 hover:border-gray-300">Ganadas</button>
+                    <button onclick="filterPositions('loss')" id="filter-loss" class="filter-btn px-4 py-1.5 rounded-full text-sm font-bold bg-white text-gray-500 border border-gray-200 hover:border-gray-300">Perdidas</button>
+                </div>
+
+                <div id="positions-list" class="space-y-4"></div>
+                </div><!-- end journal-content -->
+            </div>
+
+            <!-- TAB: MERCADO -->
+            <div id="noticias" class="tab-content">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="card"><p class="label">Tasa de Interés (Fed)</p><p id="interest-rate" class="text-3xl font-bold text-indigo-600 mt-1">—</p><p id="interest-rate-date" class="text-xs text-gray-400 mt-1"></p></div>
+                    <div class="card"><p class="label">Desempleo (UNRATE)</p><p id="unemployment-rate" class="text-3xl font-bold text-indigo-600 mt-1">—</p><p id="unemployment-rate-date" class="text-xs text-gray-400 mt-1"></p></div>
+                    <div class="card"><p class="label">Inflación IPC (Anual)</p><p id="inflation-rate" class="text-3xl font-bold text-indigo-600 mt-1">—</p><p id="inflation-rate-date" class="text-xs text-gray-400 mt-1"></p></div>
+                    <div class="card"><p class="label">Próxima Reunión FOMC</p><p id="fomc-date" class="text-3xl font-bold text-indigo-600 mt-1">—</p><p class="text-xs text-gray-400 mt-1">Decisión sobre tasas</p></div>
+                </div>
+                <div id="api-error" class="hidden mb-5 text-sm text-red-700 bg-red-50 border border-red-200 p-4 rounded-xl"></div>
+                <div class="card mb-6">
+                    <h2 class="text-base font-bold text-gray-900 mb-4">🔗 Herramientas y Recursos</h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <a href="https://finviz.com/" target="_blank" class="p-3 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg text-sm font-semibold text-center transition-colors border border-gray-100">Finviz</a>
+                        <a href="https://www.marketwatch.com/" target="_blank" class="p-3 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg text-sm font-semibold text-center transition-colors border border-gray-100">MarketWatch</a>
+                        <a href="https://finance.yahoo.com/" target="_blank" class="p-3 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg text-sm font-semibold text-center transition-colors border border-gray-100">Yahoo Finance</a>
+                        <a href="https://www.bloomberg.com/" target="_blank" class="p-3 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg text-sm font-semibold text-center transition-colors border border-gray-100">Bloomberg</a>
+                        <a href="https://unusualwhales.com/" target="_blank" class="p-3 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg text-sm font-semibold text-center transition-colors border border-gray-100">Unusual Whales</a>
+                        <a href="https://www.barchart.com/options" target="_blank" class="p-3 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg text-sm font-semibold text-center transition-colors border border-gray-100">Barchart Options</a>
+                        <a href="https://www.cboe.com/" target="_blank" class="p-3 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg text-sm font-semibold text-center transition-colors border border-gray-100">CBOE</a>
+                        <a href="https://www.federalreserve.gov/" target="_blank" class="p-3 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg text-sm font-semibold text-center transition-colors border border-gray-100">Federal Reserve</a>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2 class="text-base font-bold text-gray-900 mb-4">📅 Próximos Reportes de Ganancias (Earnings)</h2>
+                    <div id="earnings-calendar" class="space-y-2"><p class="text-center text-gray-400 text-sm py-10">Cargando datos...</p></div>
+                    <p class="text-xs text-gray-400 mt-4 text-center">Datos de FRED &amp; Finnhub</p>
+                </div>
+            </div>
+
+            <!-- TAB: CHECKLIST -->
+            <div id="checklist" class="tab-content">
+                <div class="max-w-2xl mx-auto card">
+                    <h2 class="text-base font-bold text-gray-900 mb-5 pb-3 border-b">✅ Checklist Pre-Operación</h2>
+                    <form id="trade-checklist" class="space-y-6">
+                        <div>
+                            <h3 class="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-4"><span class="w-5 h-5 bg-indigo-100 text-indigo-600 rounded flex items-center justify-center text-xs font-bold">1</span>Análisis de Mercado</h3>
+                            <div class="space-y-4 pl-7">
+                                <fieldset>
+                                    <legend class="text-sm font-semibold text-gray-700 mb-2">¿Cuál es la tendencia principal del mercado?</legend>
+                                    <div class="flex gap-5">
+                                        <label class="flex items-center gap-2 cursor-pointer text-sm"><input type="radio" name="trend" value="bullish" class="text-indigo-600"> 📈 Alcista</label>
+                                        <label class="flex items-center gap-2 cursor-pointer text-sm"><input type="radio" name="trend" value="bearish" class="text-indigo-600"> 📉 Bajista</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <legend class="text-sm font-semibold text-gray-700 mb-2">¿Hay reunión de la Fed hoy?</legend>
+                                    <div id="fed-meeting-today" class="flex gap-5 text-gray-400 text-sm">Verificando...</div>
+                                </fieldset>
+                                <fieldset>
+                                    <legend class="text-sm font-semibold text-gray-700 mb-2">¿Estamos en temporada de earnings?</legend>
+                                    <div id="earnings-season-today" class="flex gap-5 text-gray-400 text-sm">Verificando...</div>
+                                    <p class="text-xs text-gray-400 italic mt-1.5">Regla: No operar la semana del earning, sino después.</p>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-4"><span class="w-5 h-5 bg-indigo-100 text-indigo-600 rounded flex items-center justify-center text-xs font-bold">2</span>Análisis Técnico</h3>
+                            <div class="space-y-2 pl-7">
+                                <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer text-sm"><input type="checkbox" class="h-4 w-4 text-indigo-600 rounded"> ¿Hay ruptura o rompimiento de la línea de tendencia?</label>
+                                <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer text-sm"><input type="checkbox" class="h-4 w-4 text-indigo-600 rounded"> ¿Hay un salto (gap) al alza o a la baja?</label>
+                                <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer text-sm"><input type="checkbox" class="h-4 w-4 text-indigo-600 rounded"> He marcado puntos de referencia en gráficos de 1D, 1H y 15M.</label>
+                                <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer text-sm"><input type="checkbox" class="h-4 w-4 text-indigo-600 rounded"> He marcado puntos de rebote en relación a las medias móviles (1D, 1H, 15M).</label>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-4"><span class="w-5 h-5 bg-indigo-100 text-indigo-600 rounded flex items-center justify-center text-xs font-bold">3</span>Ejecución</h3>
+                            <div class="space-y-2 pl-7">
+                                <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer text-sm"><input type="checkbox" class="h-4 w-4 text-indigo-600 rounded"> La entrada se basa en el gráfico de 15 minutos.</label>
+                                <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer text-sm"><input type="checkbox" class="h-4 w-4 text-indigo-600 rounded"> El spread entre Bid y Ask es aceptable.</label>
+                                <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer text-sm"><input type="checkbox" class="h-4 w-4 text-indigo-600 rounded"> El precio de compra está dentro del rango óptimo definido en Análisis.</label>
+                                <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer text-sm"><input type="checkbox" class="h-4 w-4 text-indigo-600 rounded"> La fecha de expiración es el próximo viernes (la más cercana).</label>
+                            </div>
+                        </div>
+                        <div class="pt-3 border-t">
+                            <button type="button" id="reset-checklist" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-lg transition-colors text-sm">Reiniciar Checklist</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TAB: REFUERZO -->
+            <div id="refuerzo" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card">
+                        <h2 class="text-base font-bold text-gray-900 mb-2 pb-3 border-b">🔧 Calculadora de Refuerzo</h2>
+                        <p class="text-sm text-gray-500 mb-5">Calcula cómo promediar una posición en pérdida.</p>
+                        <form id="reinforcementForm" class="space-y-4">
+                            <div><label class="label">Inversión Inicial (USD)</label><input type="number" id="initialInvestment" placeholder="ej: 1200" step="0.01" class="input-field"></div>
+                            <div><label class="label">Contratos Iniciales</label><input type="number" id="initialContracts" placeholder="ej: 10" class="input-field"></div>
+                            <div><label class="label">Costo Actual por Contrato (USD)</label><input type="number" id="currentContractPrice" placeholder="ej: 48" step="0.01" class="input-field"></div>
+                            <button type="button" onclick="calcularRefuerzo()" class="btn-primary mt-2">Calcular Refuerzo</button>
+                        </form>
+                    </div>
+                    <div id="refuerzo-result-container" class="card hidden">
+                        <h2 class="text-base font-bold text-gray-900 mb-4">Plan de Refuerzo</h2>
+                        <div id="refuerzo-result" class="space-y-4"></div>
+                        <div id="refuerzo-error-message" class="mt-4"></div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- PRE-TRADE CHECKLIST MODAL -->
+    <div id="pretrade-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background:rgba(15,23,42,0.72)">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg" style="max-height:90vh;overflow-y:auto">
+            <!-- Header -->
+            <div class="bg-indigo-600 rounded-t-2xl px-6 py-4 flex items-center justify-between">
+                <h3 class="text-white font-bold text-base">✅ Checklist Pre-Operación</h3>
+                <button onclick="closePretradeModal()" class="text-indigo-200 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <!-- Trade summary -->
+            <div id="modal-trade-summary" class="px-6 py-3 bg-slate-50 border-b border-slate-100 text-sm"></div>
+            <!-- Checklist body -->
+            <div class="px-6 py-5 space-y-5">
+
+                <!-- Soporte / Resistencia -->
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">📍 Niveles Clave</p>
+                    <div class="space-y-2">
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>El precio está tocando o reaccionando a un nivel clave de <strong>soporte o resistencia</strong></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Medias Móviles -->
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">📈 Medias Móviles</p>
+                    <div class="space-y-2">
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>El precio está reaccionando a la <strong>Media Móvil de 20 períodos (MA20)</strong></span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>El precio está reaccionando a la <strong>Media Móvil de 40 períodos (MA40)</strong></span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>El precio está reaccionando a la <strong>Media Móvil de 100 períodos (MA100)</strong></span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>El precio está reaccionando a la <strong>Media Móvil de 200 períodos (MA200)</strong></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Bandas de Bollinger -->
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">🎯 Bandas de Bollinger</p>
+                    <div class="space-y-2">
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>El precio está reaccionando a la <strong>banda inferior</strong> de las Bandas de Bollinger</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>El precio está reaccionando a la <strong>banda superior</strong> de las Bandas de Bollinger</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>El precio está reaccionando al <strong>punto medio (línea central)</strong> de las Bandas de Bollinger</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Checked counter -->
+                <p id="modal-check-count" class="text-xs text-center text-gray-400"></p>
+            </div>
+            <!-- Footer -->
+            <div class="px-6 pb-5 pt-1 flex gap-3 border-t border-gray-100">
+                <button onclick="closePretradeModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-lg transition-colors text-sm">Cancelar</button>
+                <button onclick="confirmAndSave()" class="flex-1 btn-success flex items-center justify-center gap-2 text-sm" id="modal-confirm-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                    Confirmar y Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+    // =========================================================
+    //  FIREBASE
+    // =========================================================
+    import { initializeApp }                                          from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+    import { getFirestore, collection, doc, getDocs,
+             setDoc, updateDoc, deleteDoc, query, orderBy }           from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider,
+             onAuthStateChanged, signOut }                            from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey:            "AIzaSyAw12QTYP86j5Sao-eoeYae2fSkCbAIsSo",
+        authDomain:        "macuoptions.firebaseapp.com",
+        projectId:         "macuoptions",
+        storageBucket:     "macuoptions.firebasestorage.app",
+        messagingSenderId: "999959696391",
+        appId:             "1:999959696391:web:d021526d76219086c406a2"
+    };
+    const app      = initializeApp(firebaseConfig);
+    const db       = getFirestore(app);
+    const auth     = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    let   currentUser = null;
+    let   pendingPos   = null;
+
+    // Helpers — user-scoped Firestore paths
+    function posRef()   { return collection(db, 'users', currentUser.uid, 'positions'); }
+    function posDoc(id) { return doc(db, 'users', currentUser.uid, 'positions', String(id)); }
+
+    // =========================================================
+    //  TABS
+    // =========================================================
+    const tabBtns     = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    let newsLoaded = false;
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.tab;
+            tabContents.forEach(tc => tc.classList.remove('active'));
+            tabBtns.forEach(b => {
+                b.classList.remove('bg-indigo-50', 'text-indigo-700');
+                b.classList.add('text-gray-500');
+            });
+            btn.classList.add('bg-indigo-50', 'text-indigo-700');
+            btn.classList.remove('text-gray-500');
+            document.querySelector(target).classList.add('active');
+
+            if (target === '#diario') renderPositions(currentFilter);
+            if ((target === '#noticias' || target === '#checklist') && !newsLoaded) {
+                fetchAllEconomicData();
+                newsLoaded = true;
+            }
+        });
+    });
+
+    // =========================================================
+    //  CALCULATOR
+    // =========================================================
+    let lastCalc = null;
+
+    document.getElementById('premium').addEventListener('input', () => {
+        const v = parseFloat(document.getElementById('premium').value);
+        document.getElementById('premiumRealValue').textContent =
+            (!isNaN(v) && v > 0) ? fmt(v * 100) : '—';
+    });
+
+    function calcular() {
+        const inp = {
+            ticker:           document.getElementById('ticker').value.trim().toUpperCase() || '—',
+            tipo:             document.getElementById('tipo').value,
+            contracts:        parseInt(document.getElementById('contracts').value),
+            premium:          parseFloat(document.getElementById('premium').value),
+            strike:           parseFloat(document.getElementById('strike').value),
+            expiration:       document.getElementById('expiration').value || null,
+            entryCommissions: parseFloat(document.getElementById('entryCommissions').value) || 0,
+            sellCommissions:  parseFloat(document.getElementById('sellCommissions').value) || 0,
+            optimalPriceMin:  parseFloat(document.getElementById('optimalPriceMin').value),
+            optimalPriceMax:  parseFloat(document.getElementById('optimalPriceMax').value),
+            targetProfitPct:  parseFloat(document.getElementById('targetProfitPercentage').value)
+        };
+
+        const errEl = document.getElementById('error-message');
+        errEl.innerHTML = '';
+
+        for (const k of ['contracts', 'premium', 'strike', 'targetProfitPct']) {
+            if (isNaN(inp[k]) || (k !== 'targetProfitPct' && inp[k] <= 0)) {
+                errEl.innerHTML = '<div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-lg text-sm font-medium">⚠️ El campo <strong>' + k + '</strong> es inválido o está vacío.</div>';
+                document.getElementById('result-container').classList.remove('hidden');
+                document.getElementById('result').innerHTML = '';
+                document.getElementById('save-to-journal-section').classList.add('hidden');
+                return;
+            }
+        }
+
+        const units          = inp.contracts * 100;
+        const contractsCost  = inp.contracts * inp.premium * 100;
+        const totalCostBasis = contractsCost + inp.entryCommissions;
+
+        // Breakeven includes sell fees
+        const breakevenPerUnit    = (totalCostBasis + inp.sellCommissions) / units;
+        // Target sell: gross proceeds must cover cost_basis*(1+target%) + sell_fees
+        const targetGross         = totalCostBasis * (1 + inp.targetProfitPct) + inp.sellCommissions;
+        const targetSellPerUnit   = targetGross / units;
+        const targetNetProfit     = totalCostBasis * inp.targetProfitPct;
+
+        // Optimal range check
+        let rec = { text: '', color: 'gray' };
+        const contractCost = inp.premium * 100;
+        if (!isNaN(inp.optimalPriceMin) && inp.optimalPriceMin > 0 &&
+            !isNaN(inp.optimalPriceMax) && inp.optimalPriceMax > 0) {
+            if (inp.optimalPriceMin > inp.optimalPriceMax) {
+                rec = { text: 'Error: el mínimo no puede ser mayor que el máximo.', color: 'red' };
+            } else if (contractCost >= inp.optimalPriceMin && contractCost <= inp.optimalPriceMax) {
+                rec = { text: '✅ OPERABLE — el costo del contrato está DENTRO del rango óptimo.', color: 'green' };
+            } else {
+                const reason = contractCost < inp.optimalPriceMin ? 'por debajo del mínimo' : 'por encima del máximo';
+                rec = { text: '🚫 NO OPERAR — el costo está FUERA del rango óptimo (' + reason + ').', color: 'red' };
+            }
+        }
+
+        lastCalc = { ...inp, totalCostBasis, contractsCost, breakevenPerUnit, targetSellPerUnit, targetNetProfit };
+        showResults(inp, totalCostBasis, contractsCost, breakevenPerUnit, targetSellPerUnit, targetNetProfit, rec);
+    }
+
+    function showResults(inp, totalCostBasis, contractsCost, breakevenPerUnit, targetSellPerUnit, targetNetProfit, rec) {
+        const colors = {
+            green: 'bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800',
+            red:   'bg-red-50 border-l-4 border-red-500 text-red-800',
+            gray:  'bg-gray-50 border-l-4 border-gray-300 text-gray-700'
+        };
+        const expiLabel = inp.expiration
+            ? new Date(inp.expiration + 'T12:00:00').toLocaleDateString('es-ES', { day:'numeric', month:'short', year:'numeric' })
+            : '—';
+        const typeColor = inp.tipo === 'call' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700';
+        const typeLabel = inp.tipo === 'call' ? '📈 Call' : '📉 Put';
+        const tickerBadge = inp.ticker !== '—'
+            ? '<span class="px-2 py-0.5 text-xs font-bold rounded-full bg-indigo-100 text-indigo-700 font-mono">' + esc(inp.ticker) + '</span>'
+            : '';
+
+        document.getElementById('result').innerHTML =
+            (rec.text ? '<div class="p-3.5 rounded-lg text-sm font-semibold ' + colors[rec.color] + '">' + rec.text + '</div>' : '') +
+            '<div class="bg-slate-50 border border-slate-100 rounded-xl p-4">' +
+                '<div class="flex items-center justify-between mb-3">' +
+                    '<span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Resumen de Inversión</span>' +
+                    '<div class="flex gap-1.5">' + tickerBadge + '<span class="px-2 py-0.5 text-xs font-bold rounded-full ' + typeColor + '">' + typeLabel + '</span></div>' +
+                '</div>' +
+                '<div class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">' +
+                    '<div class="flex justify-between"><span class="text-gray-500">Contratos:</span><span class="font-bold">' + inp.contracts + '</span></div>' +
+                    '<div class="flex justify-between"><span class="text-gray-500">Strike:</span><span class="font-bold">$' + inp.strike.toFixed(2) + '</span></div>' +
+                    '<div class="flex justify-between"><span class="text-gray-500">Ask / unidad:</span><span class="font-bold font-mono">$' + inp.premium.toFixed(4) + '</span></div>' +
+                    '<div class="flex justify-between"><span class="text-gray-500">Expiración:</span><span class="font-bold">' + expiLabel + '</span></div>' +
+                    '<div class="flex justify-between"><span class="text-gray-500">Costo contratos:</span><span class="font-bold">' + fmt(contractsCost) + '</span></div>' +
+                    '<div class="flex justify-between"><span class="text-gray-500">Fees entrada:</span><span class="font-bold">' + fmt(inp.entryCommissions) + '</span></div>' +
+                    (inp.sellCommissions > 0 ? '<div class="flex justify-between"><span class="text-gray-500">Fees salida:</span><span class="font-bold">' + fmt(inp.sellCommissions) + '</span></div>' : '') +
+                    '<div class="flex justify-between col-span-2 border-t pt-2 mt-1 font-bold"><span>Inversión Total:</span><span class="text-indigo-700 text-base">' + fmt(totalCostBasis) + '</span></div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="bg-indigo-600 rounded-xl p-4 text-white">' +
+                '<p class="text-xs font-bold uppercase tracking-widest opacity-70 mb-1.5">Precio de Venta Objetivo — ' + (inp.targetProfitPct * 100).toFixed(0) + '% ganancia</p>' +
+                '<div class="flex items-baseline gap-2 mb-1"><span class="text-3xl font-bold font-mono">' + targetSellPerUnit.toFixed(4) + '</span><span class="text-sm opacity-70">USD / unidad</span></div>' +
+                '<p class="text-sm opacity-80">= <strong>' + fmt(targetSellPerUnit * 100) + '</strong> por contrato</p>' +
+                '<div class="mt-3 pt-3 border-t border-indigo-500 flex items-center justify-between">' +
+                    '<span class="text-sm opacity-75">Ganancia neta estimada:</span>' +
+                    '<span class="text-xl font-bold text-emerald-300">+' + fmt(targetNetProfit) + '</span>' +
+                '</div>' +
+                (inp.sellCommissions > 0 ? '<p class="text-xs opacity-50 mt-1.5">* Incluye fees de venta: ' + fmt(inp.sellCommissions) + '</p>' : '') +
+            '</div>' +
+            '<div class="bg-gray-50 border border-gray-100 rounded-xl p-4">' +
+                '<p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Punto de Equilibrio (Break-Even)</p>' +
+                '<div class="flex items-baseline gap-2"><span class="text-2xl font-bold font-mono text-gray-800">' + breakevenPerUnit.toFixed(4) + '</span><span class="text-sm text-gray-400">USD / unidad</span></div>' +
+                '<p class="text-sm text-gray-500 mt-1">= ' + fmt(breakevenPerUnit * 100) + ' por contrato</p>' +
+                (inp.sellCommissions > 0 ? '<p class="text-xs text-gray-400 mt-1">* Incluye fees de salida</p>' : '') +
+            '</div>';
+
+        document.getElementById('table-container').innerHTML = buildProfitTable(totalCostBasis, inp.contracts * 100, inp.sellCommissions);
+        document.getElementById('result-container').classList.remove('hidden');
+        document.getElementById('table-section').classList.remove('hidden');
+        document.getElementById('save-to-journal-section').classList.remove('hidden');
+        document.getElementById('save-btn').style.display       = currentUser ? 'flex' : 'none';
+        document.getElementById('save-login-btn').style.display = currentUser ? 'none' : 'flex';
+    }
+
+    function buildProfitTable(totalCostBasis, units, sellFees) {
+        sellFees = sellFees || 0;
+        var pcts = [0.10, 0.25, 0.35, 0.50, 0.75, 1.0, 1.5, 2.0];
+        var html = '<table class="min-w-full results-table text-sm"><thead class="bg-gray-50 border-b-2 border-gray-100"><tr>' +
+            '<th class="font-bold text-gray-500 text-xs uppercase tracking-wide">Objetivo %</th>' +
+            '<th class="font-bold text-gray-500 text-xs uppercase tracking-wide">Ganancia Neta</th>' +
+            '<th class="font-bold text-gray-500 text-xs uppercase tracking-wide">Precio / Unidad</th>' +
+            '<th class="font-bold text-gray-500 text-xs uppercase tracking-wide">Precio / Contrato</th>' +
+            '</tr></thead><tbody class="divide-y divide-gray-100">';
+        pcts.forEach(function(p) {
+            var net   = totalCostBasis * p;
+            var gross = totalCostBasis * (1 + p) + sellFees;
+            var pu    = gross / units;
+            var pc    = pu * 100;
+            html += '<tr class="hover:bg-indigo-50 transition-colors">' +
+                '<td><span class="font-bold text-indigo-600">' + (p*100).toFixed(0) + '%</span></td>' +
+                '<td class="font-semibold text-emerald-600">+' + fmt(net) + '</td>' +
+                '<td class="font-mono text-gray-700">' + pu.toFixed(4) + '</td>' +
+                '<td class="font-mono font-bold text-gray-900">' + fmt(pc) + '</td>' +
+                '</tr>';
+        });
+        return html + '</tbody></table>';
+    }
+
+    // =========================================================
+    //  JOURNAL (Firestore)
+    // =========================================================
+    var currentFilter = 'all';
+
+    async function getPositions() {
+        if (!currentUser) return [];
+        try {
+            const q        = query(posRef(), orderBy('id', 'desc'));
+            const snapshot = await getDocs(q);
+            return snapshot.docs.map(function(d){ return d.data(); });
+        } catch(e) {
+            console.error('getPositions error:', e);
+            return [];
+        }
+    }
+
+    async function syncHeader() {
+        var positions = await getPositions();
+        var n  = positions.filter(function(p){ return p.status === 'open'; }).length;
+        var el = document.getElementById('hdr-open-counter');
+        document.getElementById('hdr-open-count').textContent = n;
+        if (n > 0) { el.style.display = 'flex'; }
+        else        { el.style.display = 'none'; }
+    }
+
+    function saveToJournal() {
+        if (!lastCalc || !currentUser) return;
+        // Build the position object and hold it pending confirmation
+        pendingPos = {
+            id:               Date.now(),
+            ticker:           lastCalc.ticker,
+            tipo:             lastCalc.tipo,
+            strike:           lastCalc.strike,
+            contracts:        lastCalc.contracts,
+            premium:          lastCalc.premium,
+            entryCommissions: lastCalc.entryCommissions,
+            sellCommissions:  lastCalc.sellCommissions,
+            totalCostBasis:   lastCalc.totalCostBasis,
+            breakevenPerUnit: lastCalc.breakevenPerUnit,
+            targetSellPerUnit:lastCalc.targetSellPerUnit,
+            targetNetProfit:  lastCalc.targetNetProfit,
+            targetProfitPct:  (lastCalc.targetProfitPct * 100).toFixed(0),
+            expiration:       lastCalc.expiration || null,
+            status:           'open',
+            dateAdded:        new Date().toISOString().split('T')[0],
+            notes:            ''
+        };
+        // Populate modal summary
+        var typeLabel = pendingPos.tipo === 'call' ? '📈 Call' : '📉 Put';
+        var typeColor = pendingPos.tipo === 'call' ? 'color:#059669' : 'color:#dc2626';
+        document.getElementById('modal-trade-summary').innerHTML =
+            '<div class="flex flex-wrap items-center gap-3">' +
+            '<span class="font-extrabold font-mono text-lg text-gray-900">' + esc(pendingPos.ticker) + '</span>' +
+            '<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100" style="' + typeColor + '">' + typeLabel + '</span>' +
+            '<span class="text-xs text-gray-500">Strike <strong>$' + pendingPos.strike.toFixed(2) + '</strong></span>' +
+            '<span class="text-xs text-gray-500">Inversión <strong>' + fmt(pendingPos.totalCostBasis) + '</strong></span>' +
+            '<span class="text-xs text-gray-500">Objetivo <strong>+' + fmt(pendingPos.targetNetProfit) + '</strong></span>' +
+            '</div>';
+        // Reset checkboxes and counter
+        document.querySelectorAll('.pretrade-check').forEach(function(c){ c.checked = false; });
+        updateModalCounter();
+        // Show modal
+        var modal = document.getElementById('pretrade-modal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+    }
+
+    function updateModalCounter() {
+        var total   = document.querySelectorAll('.pretrade-check').length;
+        var checked = document.querySelectorAll('.pretrade-check:checked').length;
+        document.getElementById('modal-check-count').textContent =
+            checked + ' de ' + total + ' puntos verificados';
+    }
+
+    function closePretradeModal() {
+        var modal = document.getElementById('pretrade-modal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        pendingPos = null;
+    }
+
+    async function confirmAndSave() {
+        if (!pendingPos || !currentUser) return;
+        var btn = document.getElementById('modal-confirm-btn');
+        btn.disabled = true;
+        btn.innerHTML = 'Guardando…';
+        await setDoc(posDoc(pendingPos.id), pendingPos);
+        closePretradeModal();
+        syncHeader();
+        renderPositions(currentFilter);
+        // Feedback on save button
+        var saveBtn = document.getElementById('save-btn');
+        var orig    = saveBtn.innerHTML;
+        saveBtn.innerHTML = '✅ ¡Guardada en el Diario!';
+        saveBtn.style.background = '#10b981';
+        btn.disabled = false;
+        setTimeout(function(){ saveBtn.innerHTML = orig; saveBtn.style.background = ''; }, 2500);
+    }
+
+    async function updateStatus(id, status) {
+        if (!currentUser) return;
+        await updateDoc(posDoc(id), { status: status });
+        syncHeader();
+        renderPositions(currentFilter);
+    }
+
+    async function deletePosition(id) {
+        if (!currentUser) return;
+        if (!confirm('\u00bfEliminar esta posici\u00f3n del diario?')) return;
+        await deleteDoc(posDoc(id));
+        syncHeader();
+        renderPositions(currentFilter);
+    }
+
+    async function updateNotes(id, val) {
+        if (!currentUser) return;
+        await updateDoc(posDoc(id), { notes: val });
+    }
+
+    function filterPositions(filter) {
+        currentFilter = filter;
+        document.querySelectorAll('.filter-btn').forEach(function(b) {
+            b.classList.remove('bg-indigo-600', 'text-white');
+            b.classList.add('bg-white', 'text-gray-500');
+        });
+        var active = document.getElementById('filter-' + filter);
+        active.classList.remove('bg-white', 'text-gray-500');
+        active.classList.add('bg-indigo-600', 'text-white');
+        renderPositions(filter);
+    }
+
+    async function renderPositions(filter) {
+        var all      = await getPositions();
+        var filtered = filter === 'all' ? all : all.filter(function(p){ return p.status === filter; });
+        var wins     = all.filter(function(p){ return p.status === 'win';  }).length;
+        var losses   = all.filter(function(p){ return p.status === 'loss'; }).length;
+        var opens    = all.filter(function(p){ return p.status === 'open'; }).length;
+        var closed   = wins + losses;
+        var wr       = closed > 0 ? Math.round((wins / closed) * 100) : 0;
+
+        // Net P&L: wins add targetNetProfit, losses subtract full cost basis
+        var totalPnl = all.reduce(function(acc, p) {
+            if (p.status === 'win')  return acc + (p.targetNetProfit  || 0);
+            if (p.status === 'loss') return acc - (p.totalCostBasis   || 0);
+            return acc;
+        }, 0);
+
+        document.getElementById('stat-total').textContent   = all.length;
+        document.getElementById('stat-open').textContent    = opens;
+        document.getElementById('stat-wins').textContent    = wins;
+        document.getElementById('stat-losses').textContent  = losses;
+        document.getElementById('stat-winrate').textContent = wr + '%';
+        document.getElementById('winrate-bar').style.width  = wr + '%';
+        var pnlEl   = document.getElementById('stat-pnl');
+        var pnlCard = document.getElementById('stat-pnl-card');
+        pnlEl.textContent = fmt(totalPnl);
+        pnlEl.className   = 'text-2xl font-bold ' + (totalPnl >= 0 ? 'text-emerald-600' : 'text-red-500');
+        pnlCard.style.borderColor = totalPnl >= 0 ? '#a7f3d0' : '#fecaca';
+        if (closed > 0) document.getElementById('winrate-section').classList.remove('hidden');
+        else            document.getElementById('winrate-section').classList.add('hidden');
+
+        var listEl = document.getElementById('positions-list');
+
+        if (filtered.length === 0) {
+            var msgs = { all: 'Analiza una operación en la pestaña Análisis y guárdala.', open: 'No tienes posiciones abiertas.', win: 'No tienes posiciones ganadas aún.', loss: 'No tienes posiciones perdidas.' };
+            listEl.innerHTML = '<div class="text-center py-16 bg-white rounded-xl shadow-sm border border-gray-100"><div class="text-6xl mb-4">📋</div><h3 class="text-lg font-bold text-gray-800 mb-1">Sin posiciones</h3><p class="text-gray-400 text-sm">' + (msgs[filter] || '') + '</p></div>';
+            return;
+        }
+
+        var cfg = {
+            open: { label:'Abierta',    bg:'bg-amber-50',   border:'border-amber-200',   badge:'bg-amber-100 text-amber-700' },
+            win:  { label:'✅ Ganada',  bg:'bg-emerald-50', border:'border-emerald-200', badge:'bg-emerald-100 text-emerald-700' },
+            loss: { label:'❌ Perdida', bg:'bg-red-50',     border:'border-red-100',     badge:'bg-red-100 text-red-600' }
+        };
+
+        listEl.innerHTML = filtered.map(function(p) {
+            var s         = cfg[p.status];
+            var typeLabel = p.tipo === 'call' ? '📈 Call' : '📉 Put';
+            var typeColor = p.tipo === 'call' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700';
+            var expiLabel = p.expiration ? new Date(p.expiration + 'T12:00:00').toLocaleDateString('es-ES', {day:'numeric', month:'short', year:'numeric'}) : '—';
+            var isExpired = p.expiration && new Date(p.expiration + 'T12:00:00') < new Date() && p.status === 'open';
+            var actions   = p.status === 'open'
+                ? '<button onclick="updateStatus(' + p.id + ',\'win\')"  class="px-3 py-1.5 text-xs font-bold bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg transition-colors">✅ Ganada</button>' +
+                  '<button onclick="updateStatus(' + p.id + ',\'loss\')" class="px-3 py-1.5 text-xs font-bold bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors ml-2">❌ Perdida</button>'
+                : '<button onclick="updateStatus(' + p.id + ',\'open\')" class="px-3 py-1.5 text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors">↩ Reabrir</button>';
+            return '<div class="pos-card ' + s.bg + ' border ' + s.border + ' rounded-xl p-5">' +
+                '<div class="flex items-start justify-between mb-4">' +
+                    '<div class="flex flex-wrap items-center gap-2">' +
+                        '<span class="text-2xl font-extrabold font-mono tracking-tight text-gray-900">' + esc(p.ticker) + '</span>' +
+                        '<span class="px-2 py-0.5 text-xs font-bold rounded-full ' + typeColor + '">' + typeLabel + '</span>' +
+                        '<span class="px-2 py-0.5 text-xs font-bold rounded-full ' + s.badge + '">' + s.label + '</span>' +
+                        (isExpired ? '<span class="px-2 py-0.5 text-xs font-bold rounded-full bg-orange-100 text-orange-700">⚠️ Expirada</span>' : '') +
+                    '</div>' +
+                    '<button onclick="deletePosition(' + p.id + ')" title="Eliminar" class="text-gray-300 hover:text-red-400 transition-colors ml-2 mt-0.5">' +
+                        '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>' +
+                    '</button>' +
+                '</div>' +
+                '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">' +
+                    '<div class="bg-white rounded-lg p-2.5 shadow-sm text-center"><p class="text-xs text-gray-400 mb-0.5">Strike</p><p class="font-bold text-gray-800 text-sm">$' + (p.strike != null ? p.strike.toFixed(2) : '—') + '</p></div>' +
+                    '<div class="bg-white rounded-lg p-2.5 shadow-sm text-center"><p class="text-xs text-gray-400 mb-0.5">Contratos</p><p class="font-bold text-gray-800 text-sm">' + p.contracts + '</p></div>' +
+                    '<div class="bg-white rounded-lg p-2.5 shadow-sm text-center"><p class="text-xs text-gray-400 mb-0.5">Inversión</p><p class="font-bold text-gray-800 text-sm">' + fmt(p.totalCostBasis) + '</p></div>' +
+                    '<div class="bg-white rounded-lg p-2.5 shadow-sm text-center"><p class="text-xs text-gray-400 mb-0.5">Expiración</p><p class="font-bold text-gray-800 text-sm">' + expiLabel + '</p></div>' +
+                '</div>' +
+                '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">' +
+                    '<div class="bg-white rounded-lg p-3 shadow-sm border-l-4 border-indigo-500">' +
+                        '<p class="text-xs text-gray-400 mb-1">🎯 Vender a (' + p.targetProfitPct + '% ganancia)</p>' +
+                        '<p class="font-bold text-indigo-700 font-mono text-sm">' + (p.targetSellPerUnit != null ? p.targetSellPerUnit.toFixed(4) : '—') + ' <span class="text-xs text-gray-400 font-normal">/ unidad</span></p>' +
+                        '<p class="text-xs text-gray-500">= ' + (p.targetSellPerUnit != null ? fmt(p.targetSellPerUnit * 100) : '—') + ' / contrato</p>' +
+                        '<p class="text-xs font-bold text-emerald-600 mt-1">Ganancia: +' + (p.targetNetProfit != null ? fmt(p.targetNetProfit) : '—') + '</p>' +
+                    '</div>' +
+                    '<div class="bg-white rounded-lg p-3 shadow-sm border-l-4 border-gray-300">' +
+                        '<p class="text-xs text-gray-400 mb-1">⚖️ Break-Even</p>' +
+                        '<p class="font-bold text-gray-700 font-mono text-sm">' + (p.breakevenPerUnit != null ? p.breakevenPerUnit.toFixed(4) : '—') + ' <span class="text-xs text-gray-400 font-normal">/ unidad</span></p>' +
+                        '<p class="text-xs text-gray-500">= ' + (p.breakevenPerUnit != null ? fmt(p.breakevenPerUnit * 100) : '—') + ' / contrato</p>' +
+                        '<div class="flex gap-3 mt-1 text-xs text-gray-400">' +
+                            (p.entryCommissions ? '<span>Entrada: ' + fmt(p.entryCommissions) + '</span>' : '') +
+                            (p.sellCommissions  ? '<span>Salida: ' + fmt(p.sellCommissions)  + '</span>' : '') +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<input type="text" placeholder="Añadir notas…" value="' + esc(p.notes || '') + '" onchange="updateNotes(' + p.id + ', this.value)" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-600 mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-300 placeholder-gray-300">' +
+                '<div class="flex items-center justify-between flex-wrap gap-2">' +
+                    '<span class="text-xs text-gray-400">📅 ' + p.dateAdded + '</span>' +
+                    '<div class="flex">' + actions + '</div>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    // =========================================================
+    //  AUTHENTICATION
+    // =========================================================
+    async function loginWithGoogle() {
+        try {
+            await signInWithPopup(auth, provider);
+        } catch(e) {
+            if (e.code !== 'auth/popup-closed-by-user') {
+                console.error('Login error:', e);
+                alert('Error al iniciar sesi\u00f3n. Intenta de nuevo.');
+            }
+        }
+    }
+
+    async function logoutUser() {
+        await signOut(auth);
+    }
+
+    onAuthStateChanged(auth, async function(user) {
+        currentUser = user;
+        var btnLogin    = document.getElementById('btn-login');
+        var hdrUser     = document.getElementById('hdr-user');
+        var hdrAvatar   = document.getElementById('hdr-avatar');
+        var hdrName     = document.getElementById('hdr-name');
+        var loginWall   = document.getElementById('journal-login-wall');
+        var journalCont = document.getElementById('journal-content');
+
+        if (user) {
+            btnLogin.style.display = 'none';
+            hdrUser.style.display  = 'flex';
+            hdrAvatar.src          = user.photoURL || '';
+            hdrName.textContent    = user.displayName || user.email;
+            if (loginWall)   loginWall.classList.add('hidden');
+            if (journalCont) journalCont.classList.remove('hidden');
+            // One-time migration per user from old localStorage data
+            var MIGRATED = 'macu_migrated_v2_' + user.uid;
+            if (!localStorage.getItem(MIGRATED)) {
+                var legacy = [];
+                try { legacy = JSON.parse(localStorage.getItem('macu_positions_v1')) || []; } catch(e) {}
+                if (legacy.length > 0) {
+                    for (var p of legacy) { await setDoc(posDoc(p.id), p); }
+                }
+                localStorage.setItem(MIGRATED, '1');
+            }
+            syncHeader();
+            renderPositions(currentFilter);
+        } else {
+            btnLogin.style.display = 'flex';
+            hdrUser.style.display  = 'none';
+            if (loginWall)   loginWall.classList.remove('hidden');
+            if (journalCont) journalCont.classList.add('hidden');
+            document.getElementById('hdr-open-counter').style.display = 'none';
+        }
+    });
+
+    // =========================================================
+    //  ECONOMIC DATA
+    // =========================================================
+    async function fetchAllEconomicData() {
+        var errEl = document.getElementById('api-error');
+        errEl.classList.add('hidden');
+        try {
+            var res  = await fetch('/.netlify/functions/getEconomicData');
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            var data = await res.json();
+
+            var unemp = data.unemploymentData.observations[0];
+            document.getElementById('unemployment-rate').textContent      = parseFloat(unemp.value).toFixed(1) + '%';
+            document.getElementById('unemployment-rate-date').textContent = 'Reporte: ' + unemp.date;
+
+            var infl = data.inflationData.observations[0];
+            document.getElementById('inflation-rate').textContent      = parseFloat(infl.value).toFixed(1) + '%';
+            document.getElementById('inflation-rate-date').textContent = 'Reporte: ' + infl.date;
+
+            var cal      = data.finnhubEcoData.economicCalendar || [];
+            var latestIR = cal.filter(function(e){ return e.event === 'US Interest Rate Decision'; }).pop();
+            var nextFomc = cal.find(function(e){ return new Date(e.time) > new Date() && e.event.includes('FOMC Statement'); });
+
+            if (latestIR && latestIR.actual) {
+                document.getElementById('interest-rate').textContent      = parseFloat(latestIR.actual).toFixed(2) + '%';
+                document.getElementById('interest-rate-date').textContent = 'Actualizado: ' + latestIR.time.split(' ')[0];
+            } else {
+                document.getElementById('interest-rate').textContent = 'N/A';
+            }
+            document.getElementById('fomc-date').textContent = nextFomc
+                ? new Date(nextFomc.time).toLocaleDateString('es-ES', { day:'numeric', month:'short' })
+                : 'Por confirmar';
+
+            var earningsEl = document.getElementById('earnings-calendar');
+            var earnings   = (data.finnhubEarningsData.earningsCalendar || []).slice(0, 15);
+            earningsEl.innerHTML = earnings.length > 0
+                ? earnings.map(function(e) {
+                    return '<div class="flex justify-between items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">' +
+                        '<div class="flex items-center gap-3"><span class="font-bold text-indigo-600 font-mono w-16 text-sm">' + esc(e.symbol) + '</span><span class="text-xs text-gray-400">' + e.date + '</span></div>' +
+                        '<div class="text-xs text-gray-500">Est: <strong>' + (e.epsEstimate != null ? e.epsEstimate : 'N/A') + '</strong> &nbsp;|&nbsp; Real: <strong>' + (e.epsActual != null ? e.epsActual : 'N/A') + '</strong></div>' +
+                    '</div>';
+                }).join('')
+                : '<p class="text-center text-gray-400 py-8 text-sm">No hay reportes próximos.</p>';
+
+            var today    = new Date().toISOString().split('T')[0];
+            var fedToday = cal.some(function(e){ return e.event.includes('FOMC') && e.time.startsWith(today); });
+            document.getElementById('fed-meeting-today').innerHTML =
+                '<label class="flex items-center gap-2 cursor-pointer text-sm"><input type="radio" name="fed" value="yes" ' + (fedToday  ? 'checked' : '') + ' class="text-indigo-600"> Sí</label>' +
+                '<label class="flex items-center gap-2 cursor-pointer text-sm ml-4"><input type="radio" name="fed" value="no" ' + (!fedToday ? 'checked' : '') + ' class="text-indigo-600"> No</label>';
+
+            var earningsToday = (data.finnhubEarningsData.earningsCalendar || []).some(function(e){ return e.date === today; });
+            document.getElementById('earnings-season-today').innerHTML =
+                '<label class="flex items-center gap-2 cursor-pointer text-sm"><input type="radio" name="earnings" value="yes" ' + (earningsToday  ? 'checked' : '') + ' class="text-indigo-600"> Sí</label>' +
+                '<label class="flex items-center gap-2 cursor-pointer text-sm ml-4"><input type="radio" name="earnings" value="no" ' + (!earningsToday ? 'checked' : '') + ' class="text-indigo-600"> No</label>';
+
+        } catch(err) {
+            console.error('Economic data error:', err);
+            errEl.textContent = '⚠️ No se pudieron cargar los datos económicos. Verifica las claves de API en Netlify (FRED_API_KEY, FINNHUB_API_KEY).';
+            errEl.classList.remove('hidden');
+            ['interest-rate','unemployment-rate','inflation-rate','fomc-date'].forEach(function(id) {
+                document.getElementById(id).textContent = 'N/A';
+            });
+            document.getElementById('earnings-calendar').innerHTML = '<p class="text-center text-gray-400 py-4 text-sm">Datos no disponibles.</p>';
+        }
+    }
+
+    // =========================================================
+    //  CHECKLIST
+    // =========================================================
+    document.getElementById('reset-checklist').addEventListener('click', function() {
+        document.getElementById('trade-checklist').reset();
+    });
+
+    // =========================================================
+    //  REINFORCEMENT
+    // =========================================================
+    function calcularRefuerzo() {
+        var inv      = parseFloat(document.getElementById('initialInvestment').value);
+        var ctrs     = parseInt(document.getElementById('initialContracts').value);
+        var curPrice = parseFloat(document.getElementById('currentContractPrice').value);
+        var errEl    = document.getElementById('refuerzo-error-message');
+        var resEl    = document.getElementById('refuerzo-result');
+        var cont     = document.getElementById('refuerzo-result-container');
+        errEl.innerHTML = '';
+
+        if ([inv, ctrs, curPrice].some(function(v){ return isNaN(v) || v <= 0; })) {
+            resEl.innerHTML = '';
+            errEl.innerHTML = '<div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-lg text-sm font-medium">⚠️ Introduce valores positivos válidos en todos los campos.</div>';
+            cont.classList.remove('hidden');
+            return;
+        }
+
+        var newCtrs   = Math.round(inv / curPrice);
+        var newInv    = newCtrs * curPrice;
+        var totalCtrs = ctrs + newCtrs;
+        var totalInv  = inv + newInv;
+        var avgPrice  = totalInv / totalCtrs;
+
+        resEl.innerHTML =
+            '<div class="grid grid-cols-2 gap-4">' +
+                '<div class="bg-gray-50 rounded-xl p-4 text-center border border-gray-100"><p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Contratos a Reforzar</p><p class="text-3xl font-bold text-indigo-600">' + newCtrs + '</p></div>' +
+                '<div class="bg-gray-50 rounded-xl p-4 text-center border border-gray-100"><p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Inversión Adicional</p><p class="text-3xl font-bold text-indigo-600">' + fmt(newInv) + '</p></div>' +
+            '</div>' +
+            '<div class="bg-indigo-50 rounded-xl p-4 border border-indigo-100">' +
+                '<p class="text-xs font-bold text-indigo-700 uppercase tracking-wide mb-3">Posición Resultante</p>' +
+                '<div class="space-y-2 text-sm">' +
+                    '<div class="flex justify-between"><span class="text-gray-600">Contratos Totales:</span><span class="font-bold">' + totalCtrs + '</span></div>' +
+                    '<div class="flex justify-between"><span class="text-gray-600">Inversión Total:</span><span class="font-bold">' + fmt(totalInv) + '</span></div>' +
+                    '<div class="flex justify-between border-t pt-2 mt-2 font-bold text-indigo-700"><span>Nuevo Costo Promedio:</span><span>' + fmt(avgPrice) + '</span></div>' +
+                '</div>' +
+            '</div>';
+        cont.classList.remove('hidden');
+    }
+
+    // =========================================================
+    //  UTILS
+    // =========================================================
+    function fmt(n) {
+        return Number(n).toLocaleString('en-US', { style:'currency', currency:'USD' });
+    }
+    function esc(s) {
+        if (!s) return '';
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // =========================================================
+    //  INIT
+    // =========================================================
+    // Expose functions used by inline HTML handlers
+    window.calcular            = calcular;
+    window.saveToJournal       = saveToJournal;
+    window.filterPositions     = filterPositions;
+    window.updateStatus        = updateStatus;
+    window.deletePosition      = deletePosition;
+    window.updateNotes         = updateNotes;
+    window.calcularRefuerzo    = calcularRefuerzo;
+    window.loginWithGoogle     = loginWithGoogle;
+    window.logoutUser          = logoutUser;
+    window.closePretradeModal  = closePretradeModal;
+    window.confirmAndSave      = confirmAndSave;
+    window.updateModalCounter  = updateModalCounter;
+
+    // Live counter as user checks boxes
+    document.getElementById('pretrade-modal').addEventListener('change', function(e) {
+        if (e.target.classList.contains('pretrade-check')) updateModalCounter();
+    });
+    </script>
+</body>
+</html>
