@@ -37,19 +37,23 @@ exports.handler = async function(event, context) {
         safeFetch(finnhubEarningsUrl, { earningsCalendar: [] })
     ]);
 
-    // Enrich earnings with company names via profile2
+    // Enrich earnings with company names via /search (broader coverage than profile2)
     const earningsList = (finnhubEarningsRaw.earningsCalendar || []).slice(0, 15);
     const symbols = [...new Set(earningsList.map(e => e.symbol))].slice(0, 12);
-    const profiles = await Promise.all(
+    const searches = await Promise.all(
         symbols.map(sym =>
             safeFetch(
-                `https://finnhub.io/api/v1/stock/profile2?symbol=${encodeURIComponent(sym)}&token=${FINNHUB_API_KEY}`,
-                { symbol: sym, name: '' }
+                `https://finnhub.io/api/v1/search?q=${encodeURIComponent(sym)}&token=${FINNHUB_API_KEY}`,
+                { count: 0, result: [] }
             )
         )
     );
     const nameMap = {};
-    profiles.forEach(p => { if (p && p.symbol) nameMap[p.symbol] = p.name || ''; });
+    searches.forEach((res, i) => {
+        const sym = symbols[i];
+        const match = (res.result || []).find(r => r.symbol === sym || r.displaySymbol === sym);
+        nameMap[sym] = match ? match.description : '';
+    });
     const enrichedEarnings = earningsList.map(e => ({ ...e, companyName: nameMap[e.symbol] || '' }));
     const finnhubEarningsData = { earningsCalendar: enrichedEarnings };
 
