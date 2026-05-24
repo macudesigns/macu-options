@@ -75,6 +75,8 @@
             <button data-tab="#diario"    class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">📁 Diario</button>
             <button data-tab="#noticias"  class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">📈 Mercado</button>
             <button data-tab="#refuerzo"  class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">🔧 Refuerzo</button>
+            <button data-tab="#interes"   class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">💰 Interés</button>
+            <button data-tab="#inversion" class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">🏠 Inversión</button>
         </div>
 
         <main>
@@ -303,6 +305,81 @@
                         <h2 class="text-base font-bold text-gray-900 mb-4">Plan de Refuerzo</h2>
                         <div id="refuerzo-result" class="space-y-4"></div>
                         <div id="refuerzo-error-message" class="mt-4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: INTERÉS COMPUESTO -->
+            <div id="interes" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card">
+                        <h2 class="text-base font-bold text-gray-900 mb-2 pb-3 border-b">💰 Calculadora de Interés Compuesto</h2>
+                        <p class="text-sm text-gray-500 mb-5">Proyecta cuánto crecerá tu dinero con el tiempo, descontando el efecto de la inflación.</p>
+                        <div id="ci-error" class="hidden mb-4 text-sm text-red-700 bg-red-50 border border-red-200 p-3 rounded-lg"></div>
+                        <form class="space-y-4">
+                            <div><label class="label">Capital Inicial (USD)</label><input type="number" id="ci-principal" placeholder="ej: 10,000" step="0.01" class="input-field"></div>
+                            <div><label class="label">Aportación Mensual (USD)</label><input type="number" id="ci-monthly" placeholder="ej: 500 (opcional)" step="0.01" class="input-field"></div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><label class="label">Rendimiento Anual (%)</label><input type="number" id="ci-rate" placeholder="ej: 8" step="0.1" class="input-field"></div>
+                                <div><label class="label">Inflación Anual (%)</label><input type="number" id="ci-inflation" placeholder="ej: 3.5" step="0.1" class="input-field"></div>
+                            </div>
+                            <div><label class="label">Años</label><input type="number" id="ci-years" placeholder="ej: 20" min="1" max="50" class="input-field"></div>
+                            <button type="button" onclick="calcularInteres()" class="btn-primary mt-2">Calcular</button>
+                        </form>
+                    </div>
+                    <div id="ci-result-container" class="card hidden">
+                        <h2 class="text-base font-bold text-gray-900 mb-4 pb-3 border-b">📊 Resultados</h2>
+                        <div id="ci-result"></div>
+                    </div>
+                </div>
+                <div id="ci-table-container" class="card mt-6 hidden">
+                    <h2 class="text-base font-bold text-gray-900 mb-4 pb-3 border-b">📅 Proyección Año a Año</h2>
+                    <div id="ci-table" class="overflow-x-auto rounded-lg border border-gray-100"></div>
+                </div>
+            </div>
+
+            <!-- TAB: ANÁLISIS DE INVERSIÓN -->
+            <div id="inversion" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card">
+                        <h2 class="text-base font-bold text-gray-900 mb-2 pb-3 border-b">🏠 Análisis de Inversión / Préstamo</h2>
+                        <p class="text-sm text-gray-500 mb-4">Calcula el costo real total de una compra financiada, incluyendo intereses y gastos recurrentes.</p>
+                        <div id="inv-error" class="hidden mb-4 text-sm text-red-700 bg-red-50 border border-red-200 p-3 rounded-lg"></div>
+                        <form class="space-y-4">
+                            <div>
+                                <label class="label">¿Qué vas a comprar?</label>
+                                <div class="grid grid-cols-3 gap-2 mt-1">
+                                    <button type="button" onclick="setInvType('house')"    id="invt-house"    class="inv-type-btn py-2 px-2 rounded-lg border text-xs font-semibold transition-colors bg-indigo-50 text-indigo-700 border-indigo-200">🏠 Hipoteca</button>
+                                    <button type="button" onclick="setInvType('car')"      id="invt-car"      class="inv-type-btn py-2 px-2 rounded-lg border text-xs font-semibold transition-colors text-gray-500 border-gray-200 hover:bg-gray-50">🚗 Auto</button>
+                                    <button type="button" onclick="setInvType('phone')"    id="invt-phone"    class="inv-type-btn py-2 px-2 rounded-lg border text-xs font-semibold transition-colors text-gray-500 border-gray-200 hover:bg-gray-50">📱 Smartphone</button>
+                                    <button type="button" onclick="setInvType('personal')" id="invt-personal" class="inv-type-btn py-2 px-2 rounded-lg border text-xs font-semibold transition-colors text-gray-500 border-gray-200 hover:bg-gray-50">💰 Personal</button>
+                                    <button type="button" onclick="setInvType('school')"   id="invt-school"   class="inv-type-btn py-2 px-2 rounded-lg border text-xs font-semibold transition-colors text-gray-500 border-gray-200 hover:bg-gray-50">🎓 Estudiantil</button>
+                                    <button type="button" onclick="setInvType('other2')"   id="invt-other2"   class="inv-type-btn py-2 px-2 rounded-lg border text-xs font-semibold transition-colors text-gray-500 border-gray-200 hover:bg-gray-50">⚡ Otro</button>
+                                </div>
+                                <input type="hidden" id="inv-type" value="house">
+                            </div>
+                            <div><label class="label">Precio de Contado / Valor Real del Bien (USD)</label><input type="number" id="inv-cash-price" placeholder="ej: 300,000 (opcional)" step="0.01" class="input-field"></div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><label class="label">Monto del Préstamo (USD)</label><input type="number" id="inv-loan" placeholder="ej: 250,000" step="0.01" class="input-field"></div>
+                                <div><label class="label">Enganche / Down Payment (USD)</label><input type="number" id="inv-down" placeholder="ej: 50,000" step="0.01" class="input-field"></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><label class="label">Tasa de Interés Anual (%)</label><input type="number" id="inv-rate" placeholder="ej: 6.5" step="0.01" class="input-field"></div>
+                                <div><label class="label">Plazo (años)</label><input type="number" id="inv-years" placeholder="ej: 30" step="0.5" class="input-field"></div>
+                            </div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Gastos Mensuales Adicionales</p>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div><label class="label">Seguro</label><input type="number" id="inv-insurance" placeholder="ej: 150" step="0.01" class="input-field"></div>
+                                <div><label class="label">Mantenimiento</label><input type="number" id="inv-maintenance" placeholder="ej: 200" step="0.01" class="input-field"></div>
+                                <div><label class="label">Otros</label><input type="number" id="inv-other" placeholder="ej: 100" step="0.01" class="input-field"></div>
+                            </div>
+                            <div><label class="label">Inflación Anual Esperada (%)</label><input type="number" id="inv-inflation" placeholder="ej: 3.5 (opcional)" step="0.1" class="input-field"></div>
+                            <button type="button" onclick="calcularInversion()" class="btn-primary mt-2">Analizar Inversión</button>
+                        </form>
+                    </div>
+                    <div id="inv-result-container" class="card hidden">
+                        <h2 class="text-base font-bold text-gray-900 mb-4 pb-3 border-b">📊 Análisis de Costo Real</h2>
+                        <div id="inv-result"></div>
                     </div>
                 </div>
             </div>
@@ -1085,6 +1162,150 @@
     }
 
     // =========================================================
+    //  COMPOUND INTEREST CALCULATOR
+    // =========================================================
+    function calcularInteres() {
+        var P     = parseFloat(document.getElementById('ci-principal').value) || 0;
+        var PMT   = parseFloat(document.getElementById('ci-monthly').value)   || 0;
+        var rate  = parseFloat(document.getElementById('ci-rate').value);
+        var inf   = parseFloat(document.getElementById('ci-inflation').value) || 0;
+        var years = parseInt(document.getElementById('ci-years').value);
+        var errEl = document.getElementById('ci-error');
+        errEl.classList.add('hidden');
+        if (isNaN(rate) || rate < 0 || isNaN(years) || years <= 0) {
+            errEl.textContent = 'Ingresa el rendimiento anual y los años.'; errEl.classList.remove('hidden'); return;
+        }
+        if (P <= 0 && PMT <= 0) {
+            errEl.textContent = 'Ingresa un capital inicial o una aportación mensual.'; errEl.classList.remove('hidden'); return;
+        }
+        var months = years * 12;
+        var r      = rate / 100 / 12;
+        var growth = Math.pow(1 + r, months);
+        var FV     = r === 0 ? P + PMT * months : P * growth + PMT * (growth - 1) / r;
+        var FVreal = FV / Math.pow(1 + inf / 100, years);
+        var contrib = P + PMT * months;
+        var gain    = FV - contrib;
+        var infLoss = FV - FVreal;
+        var realGain = FVreal - contrib;
+
+        document.getElementById('ci-result').innerHTML =
+            '<div class="grid grid-cols-2 gap-3 mb-4">' +
+                '<div class="bg-indigo-600 rounded-xl p-4 text-center"><p class="text-indigo-200 text-xs mb-1">Capital Final Nominal</p><p class="text-white font-extrabold text-2xl">' + fmt(FV) + '</p></div>' +
+                '<div class="bg-emerald-600 rounded-xl p-4 text-center"><p class="text-emerald-100 text-xs mb-1">Valor Real (poder adquisitivo hoy)</p><p class="text-white font-extrabold text-2xl">' + fmt(FVreal) + '</p></div>' +
+            '</div>' +
+            '<div class="grid grid-cols-2 gap-3 mb-4">' +
+                '<div class="bg-gray-50 border rounded-xl p-3 text-center"><p class="text-xs text-gray-400 mb-0.5">Total Aportado</p><p class="font-bold text-gray-800">' + fmt(contrib) + '</p></div>' +
+                '<div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-center"><p class="text-xs text-gray-400 mb-0.5">Ganancia Nominal</p><p class="font-bold text-emerald-700">+' + fmt(gain) + '</p></div>' +
+                '<div class="bg-amber-50 border border-amber-100 rounded-xl p-3 text-center"><p class="text-xs text-gray-400 mb-0.5">Erosión por Inflación</p><p class="font-bold text-amber-600">-' + fmt(infLoss) + '</p></div>' +
+                '<div class="' + (realGain >= 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100') + ' border rounded-xl p-3 text-center"><p class="text-xs text-gray-400 mb-0.5">Ganancia Real</p><p class="font-bold ' + (realGain >= 0 ? 'text-emerald-700' : 'text-red-600') + '">' + (realGain >= 0 ? '+' : '') + fmt(realGain) + '</p></div>' +
+            '</div>' +
+            '<div class="p-3 bg-gray-50 rounded-lg text-xs text-gray-500"><strong>Parámetros:</strong> ' + fmt(P) + ' inicial · +' + fmt(PMT) + '/mes · ' + rate + '% rendimiento · ' + inf + '% inflación · ' + years + ' años</div>';
+
+        var tableRows = '';
+        for (var y = 1; y <= years; y++) {
+            var m  = y * 12;
+            var g  = Math.pow(1 + r, m);
+            var nv = r === 0 ? P + PMT * m : P * g + PMT * (g - 1) / r;
+            var rv = nv / Math.pow(1 + inf / 100, y);
+            var ct = P + PMT * m;
+            tableRows += '<tr class="' + (y % 2 ? 'bg-white' : 'bg-gray-50') + ' text-sm">' +
+                '<td class="px-3 py-2 font-bold text-gray-700 text-center">' + y + '</td>' +
+                '<td class="px-3 py-2 font-mono text-indigo-700">' + fmt(nv) + '</td>' +
+                '<td class="px-3 py-2 font-mono text-emerald-600">' + fmt(rv) + '</td>' +
+                '<td class="px-3 py-2 font-mono text-gray-400">' + fmt(ct) + '</td>' +
+                '<td class="px-3 py-2 font-mono font-semibold ' + (nv - ct >= 0 ? 'text-emerald-700' : 'text-red-600') + '">+' + fmt(nv - ct) + '</td></tr>';
+        }
+        document.getElementById('ci-table').innerHTML =
+            '<table class="w-full text-left border-collapse text-sm"><thead><tr class="bg-indigo-600 text-white text-xs">' +
+            '<th class="px-3 py-2 text-center">Año</th><th class="px-3 py-2">Valor Nominal</th><th class="px-3 py-2">Valor Real</th><th class="px-3 py-2">Total Aportado</th><th class="px-3 py-2">Ganancia</th>' +
+            '</tr></thead><tbody>' + tableRows + '</tbody></table>';
+        document.getElementById('ci-result-container').classList.remove('hidden');
+        document.getElementById('ci-table-container').classList.remove('hidden');
+    }
+
+    // =========================================================
+    //  INVESTMENT ANALYSIS CALCULATOR
+    // =========================================================
+    function setInvType(type) {
+        document.getElementById('inv-type').value = type;
+        document.querySelectorAll('.inv-type-btn').forEach(function(b) {
+            b.classList.remove('bg-indigo-50','text-indigo-700','border-indigo-200');
+            b.classList.add('text-gray-500','border-gray-200');
+        });
+        var active = document.getElementById('invt-' + type);
+        if (active) { active.classList.remove('text-gray-500','border-gray-200'); active.classList.add('bg-indigo-50','text-indigo-700','border-indigo-200'); }
+    }
+
+    function calcularInversion() {
+        var cashPrice   = parseFloat(document.getElementById('inv-cash-price').value) || 0;
+        var loanAmount  = parseFloat(document.getElementById('inv-loan').value);
+        var downPay     = parseFloat(document.getElementById('inv-down').value) || 0;
+        var annualRate  = parseFloat(document.getElementById('inv-rate').value);
+        var years       = parseFloat(document.getElementById('inv-years').value);
+        var insurance   = parseFloat(document.getElementById('inv-insurance').value) || 0;
+        var maintenance = parseFloat(document.getElementById('inv-maintenance').value) || 0;
+        var other       = parseFloat(document.getElementById('inv-other').value) || 0;
+        var inflation   = parseFloat(document.getElementById('inv-inflation').value) || 0;
+        var errEl = document.getElementById('inv-error');
+        errEl.classList.add('hidden');
+        if (isNaN(loanAmount) || loanAmount <= 0 || isNaN(annualRate) || isNaN(years) || years <= 0) {
+            errEl.textContent = 'Ingresa monto del préstamo, tasa de interés y plazo.'; errEl.classList.remove('hidden'); return;
+        }
+        var principal = loanAmount - downPay;
+        if (principal <= 0) {
+            errEl.textContent = 'El enganche no puede ser igual o mayor al préstamo.'; errEl.classList.remove('hidden'); return;
+        }
+        var months = Math.round(years * 12);
+        var r      = annualRate / 100 / 12;
+        var pow    = Math.pow(1 + r, months);
+        var mpay   = r === 0 ? principal / months : principal * r * pow / (pow - 1);
+        var totalLoan  = mpay * months + downPay;
+        var totalInt   = totalLoan - loanAmount;
+        var extras     = (insurance + maintenance + other) * months;
+        var totalCost  = totalLoan + extras;
+        var mExtras    = insurance + maintenance + other;
+        var typeMap = { house:'🏠 Hipoteca', car:'🚗 Auto', phone:'📱 Smartphone', personal:'💰 Personal', school:'🎓 Estudiantil', other2:'⚡ Otro' };
+        var typeLabel = typeMap[document.getElementById('inv-type').value] || '💰 Préstamo';
+        var verdict = '', vClass = '';
+        if (cashPrice > 0) {
+            var pct = ((totalCost - cashPrice) / cashPrice) * 100;
+            if (pct <= 15)      { verdict = '✅ Costo razonable (+' + pct.toFixed(1) + '%)'; vClass = 'text-emerald-700 bg-emerald-50 border-emerald-200'; }
+            else if (pct <= 40) { verdict = '⚠️ Costo moderado (+' + pct.toFixed(1) + '%)';  vClass = 'text-amber-700 bg-amber-50 border-amber-200'; }
+            else                { verdict = '🚨 Costo elevado (+' + pct.toFixed(1) + '%)';   vClass = 'text-red-700 bg-red-50 border-red-200'; }
+        }
+        function dRow(lbl, val, color) {
+            var c = { gray:'text-gray-700', red:'text-red-600', amber:'text-amber-600', indigo:'text-indigo-700', green:'text-emerald-600' };
+            return '<div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"><span class="text-sm text-gray-500">' + lbl + '</span><span class="text-sm font-bold ' + (c[color]||'text-gray-700') + '">' + val + '</span></div>';
+        }
+        var infNote = '';
+        if (inflation > 0) {
+            var eqFuture = mpay * Math.pow(1 + inflation / 100, years);
+            infNote = '<div class="mt-3 p-3 bg-amber-50 border border-amber-100 rounded-lg text-xs text-amber-700"><strong>📉 Efecto inflación (' + inflation + '% anual):</strong> Tu cuota de ' + fmt(mpay) + '/mes hoy tendrá el poder adquisitivo de ' + fmt(eqFuture) + ' al final del plazo.</div>';
+        }
+        document.getElementById('inv-result').innerHTML =
+            '<div class="flex items-start justify-between gap-2 mb-4">' +
+                '<span class="font-bold text-gray-800">' + typeLabel + '</span>' +
+                (verdict ? '<span class="text-xs font-semibold px-2 py-1 rounded-lg border ' + vClass + '">' + verdict + '</span>' : '') +
+            '</div>' +
+            '<div class="grid grid-cols-2 gap-3 mb-4">' +
+                '<div class="bg-indigo-600 rounded-xl p-3 text-center"><p class="text-indigo-200 text-xs mb-0.5">Cuota Mensual</p><p class="text-white font-extrabold text-xl">' + fmt(mpay) + '</p>' + (mExtras > 0 ? '<p class="text-indigo-200 text-xs mt-0.5">Con extras: ' + fmt(mpay + mExtras) + '/mes</p>' : '') + '</div>' +
+                '<div class="bg-red-50 border border-red-100 rounded-xl p-3 text-center"><p class="text-xs text-gray-400 mb-0.5">Total Intereses</p><p class="font-bold text-red-600 text-xl">' + fmt(totalInt) + '</p><p class="text-xs text-gray-400">(' + ((totalInt/loanAmount)*100).toFixed(1) + '% del préstamo)</p></div>' +
+            '</div>' +
+            '<div class="border border-gray-100 rounded-xl overflow-hidden mb-3">' +
+                (cashPrice > 0 ? dRow('Precio de contado', fmt(cashPrice), 'green') : '') +
+                dRow('Monto del préstamo', fmt(loanAmount), 'gray') +
+                (downPay > 0 ? dRow('Enganche inicial', fmt(downPay), 'gray') : '') +
+                dRow('Total pagado al banco', fmt(totalLoan), 'red') +
+                (extras > 0 ? dRow('Gastos extras (' + months + ' meses)', fmt(extras), 'amber') : '') +
+                dRow('Costo total real', fmt(totalCost), 'indigo') +
+                (cashPrice > 0 ? dRow('Pagas de más vs contado', '+' + fmt(totalCost - cashPrice), totalCost - cashPrice > cashPrice * 0.4 ? 'red' : 'amber') : '') +
+            '</div>' +
+            infNote +
+            '<div class="p-3 bg-gray-50 rounded-lg text-xs text-gray-500"><strong>Parámetros:</strong> ' + fmt(loanAmount) + ' al ' + annualRate + '% anual · ' + years + ' años (' + months + ' meses)</div>';
+        document.getElementById('inv-result-container').classList.remove('hidden');
+    }
+
+    // =========================================================
     //  UTILS
     // =========================================================
     function fmt(n) {
@@ -1106,6 +1327,9 @@
     window.deletePosition      = deletePosition;
     window.updateNotes         = updateNotes;
     window.calcularRefuerzo    = calcularRefuerzo;
+    window.calcularInteres     = calcularInteres;
+    window.calcularInversion   = calcularInversion;
+    window.setInvType          = setInvType;
     window.loginWithGoogle     = loginWithGoogle;
     window.logoutUser          = logoutUser;
     window.closePretradeModal  = closePretradeModal;
