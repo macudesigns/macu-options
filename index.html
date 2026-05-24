@@ -1025,6 +1025,17 @@
             var origInv    = p.totalCostBasis - sumRefInv;
             var origPrem   = origCtrs > 0 ? (origInv / (origCtrs * 100)).toFixed(4) : (p.premium ? p.premium.toFixed(4) : '—');
             var avgPerUnit = p.contracts > 0 ? (p.totalCostBasis / (p.contracts * 100)).toFixed(4) : '—';
+            // Live-computed target values — always correct after refuerzos
+            var liveProfitPct         = typeof p.targetProfitPct === 'number' ? p.targetProfitPct : 0;
+            var liveUnits             = p.contracts * 100;
+            var liveSellComm          = p.sellCommissions || 0;
+            var liveTargetSellPerUnit = liveProfitPct > 0 && liveUnits > 0
+                ? (p.totalCostBasis * (1 + liveProfitPct) + liveSellComm) / liveUnits
+                : p.targetSellPerUnit;
+            var liveTargetNetProfit   = liveProfitPct > 0
+                ? p.totalCostBasis * liveProfitPct
+                : p.targetNetProfit;
+            var liveProfitPctDisplay  = liveProfitPct > 0 ? Math.round(liveProfitPct * 100) : (p.targetProfitPct || '?');
             var refHistoryHtml = '';
             if (refuerzos.length > 0) {
                 var rows = '<div class="flex items-center gap-2 py-1.5 border-b border-gray-100 text-xs">' +
@@ -1085,10 +1096,10 @@
                 '</div>' +
                 '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">' +
                     '<div class="bg-white rounded-lg p-3 shadow-sm border-l-4 border-indigo-500">' +
-                        '<p class="text-xs text-gray-400 mb-1">🎯 Vender a (' + p.targetProfitPct + '% ganancia)</p>' +
-                        '<p class="font-bold text-indigo-700 font-mono text-sm">' + (p.targetSellPerUnit != null ? p.targetSellPerUnit.toFixed(4) : '—') + ' <span class="text-xs text-gray-400 font-normal">/ unidad</span></p>' +
-                        '<p class="text-xs text-gray-500">= ' + (p.targetSellPerUnit != null ? fmt(p.targetSellPerUnit * 100) : '—') + ' / contrato</p>' +
-                        '<p class="text-xs font-bold text-emerald-600 mt-1">Ganancia: +' + (p.targetNetProfit != null ? fmt(p.targetNetProfit) : '—') + '</p>' +
+                        '<p class="text-xs text-gray-400 mb-1">🎯 Vender a (' + liveProfitPctDisplay + '% ganancia)</p>' +
+                        '<p class="font-bold text-indigo-700 font-mono text-sm">' + (liveTargetSellPerUnit != null ? liveTargetSellPerUnit.toFixed(4) : '—') + ' <span class="text-xs text-gray-400 font-normal">/ unidad</span></p>' +
+                        '<p class="text-xs text-gray-500">= ' + (liveTargetSellPerUnit != null ? fmt(liveTargetSellPerUnit * 100) : '—') + ' / contrato</p>' +
+                        '<p class="text-xs font-bold text-emerald-600 mt-1">Ganancia: +' + (liveTargetNetProfit != null ? fmt(liveTargetNetProfit) : '—') + '</p>' +
                     '</div>' +
                     '<div class="bg-white rounded-lg p-3 shadow-sm border-l-4 border-gray-300">' +
                         '<p class="text-xs text-gray-400 mb-1">⚖️ Break-Even</p>' +
@@ -1408,12 +1419,21 @@
             investment:   r.newInv,
             buyFee:       r.buyFee
         };
+        var newUnits            = r.totalCtrs * 100;
+        var profitPct           = pos.targetProfitPct || 0;
+        var newSellComm         = pos.sellCommissions || 0;
+        var newTargetSellPerUnit = profitPct > 0 && newUnits > 0
+            ? (r.totalInv * (1 + profitPct) + newSellComm) / newUnits
+            : pos.targetSellPerUnit;
+        var newTargetNetProfit   = profitPct > 0 ? r.totalInv * profitPct : pos.targetNetProfit;
         await updateDoc(posDoc(pos.id), {
-            contracts:       r.totalCtrs,
-            totalCostBasis:  r.totalInv,
-            premium:         r.avgPricePerUnit,
-            breakevenPerUnit: r.bePerUnit,
-            refuerzos:       arrayUnion(entry)
+            contracts:         r.totalCtrs,
+            totalCostBasis:    r.totalInv,
+            premium:           r.avgPricePerUnit,
+            breakevenPerUnit:  r.bePerUnit,
+            targetSellPerUnit: newTargetSellPerUnit,
+            targetNetProfit:   newTargetNetProfit,
+            refuerzos:         arrayUnion(entry)
         });
         closeRefuerzoModal();
         syncHeader();
