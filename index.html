@@ -123,7 +123,7 @@
                                 </div>
                                 <div>
                                     <label class="label">Precio Ask / Unidad</label>
-                                    <input type="number" id="premium" placeholder="ej: 0.45" step="any" class="input-field">
+                                    <input type="number" id="premium" placeholder="ej: 0.45" step="any" min="0.0001" class="input-field">
                                 </div>
                             </div>
 
@@ -649,7 +649,9 @@
     let lastCalc = null;
 
     document.getElementById('premium').addEventListener('input', () => {
-        const v = parseFloat(document.getElementById('premium').value);
+        const el = document.getElementById('premium');
+        if (parseFloat(el.value) < 0) el.value = '';
+        const v = parseFloat(el.value);
         document.getElementById('premiumRealValue').textContent =
             (!isNaN(v) && v > 0) ? fmt(v * 100) : '—';
     });
