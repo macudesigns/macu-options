@@ -585,6 +585,7 @@
                 </div>
                 <div id="refuerzo-modal-result-container" class="hidden pt-2">
                     <div id="refuerzo-modal-result"></div>
+                    <button type="button" id="refuerzo-confirm-btn" onclick="confirmRefuerzo()" class="btn-success mt-4 hidden">✅ Confirmar y Guardar Refuerzo</button>
                 </div>
             </div>
         </div>
@@ -596,7 +597,7 @@
     // =========================================================
     import { initializeApp }                                          from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
     import { getFirestore, collection, doc, getDocs,
-             setDoc, updateDoc, deleteDoc, query, orderBy }           from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+             setDoc, updateDoc, deleteDoc, query, orderBy, arrayUnion }           from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider,
              onAuthStateChanged, signOut }                            from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 
@@ -1254,7 +1255,8 @@
     // =========================================================
     //  REFUERZO MODAL
     // =========================================================
-    var refuerzoModalPos = null;
+    var refuerzoModalPos    = null;
+    var lastRefuerzoResult  = null;
 
     function openRefuerzoModal(posId) {
         getPositions().then(function(all) {
@@ -1267,6 +1269,8 @@
             document.getElementById('ref-sell-fee').value   = pos.sellCommissions  || '';
             document.getElementById('refuerzo-modal-error').classList.add('hidden');
             document.getElementById('refuerzo-modal-result-container').classList.add('hidden');
+            document.getElementById('refuerzo-confirm-btn').classList.add('hidden');
+            lastRefuerzoResult = null;
             var typeLabel = pos.tipo === 'call' ? '📈 Call' : '📉 Put';
             var typeColor = pos.tipo === 'call' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700';
             var avgPerUnit = pos.totalCostBasis / (pos.contracts * 100);
@@ -1308,6 +1312,18 @@
         var totalInv  = inv + newInv;
         var avgPrice  = totalInv / totalCtrs;              // new avg per contract
         var bePerCtrt = (totalInv + sellFee) / totalCtrs; // breakeven per contract
+        // Store for confirm step
+        lastRefuerzoResult = {
+            newCtrs:         newCtrs,
+            newInv:          newInv,
+            buyFee:          buyFee,
+            curPricePerUnit: curPrice / 100,
+            totalCtrs:       totalCtrs,
+            totalInv:        totalInv,
+            avgPricePerUnit: avgPrice / 100,
+            bePerUnit:       bePerCtrt / 100
+        };
+        document.getElementById('refuerzo-confirm-btn').classList.remove('hidden');
         document.getElementById('refuerzo-modal-result').innerHTML =
             '<div class="grid grid-cols-2 gap-4 mb-4">' +
                 '<div class="bg-gray-50 rounded-xl p-4 text-center border border-gray-100"><p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Contratos a Reforzar</p><p class="text-3xl font-bold text-indigo-600">' + newCtrs + '</p></div>' +
@@ -1330,7 +1346,34 @@
         var modal = document.getElementById('refuerzo-modal');
         modal.classList.add('hidden');
         modal.style.display = 'none';
-        refuerzoModalPos = null;
+        refuerzoModalPos   = null;
+        lastRefuerzoResult = null;
+    }
+
+    async function confirmRefuerzo() {
+        if (!lastRefuerzoResult || !refuerzoModalPos || !currentUser) return;
+        var btn = document.getElementById('refuerzo-confirm-btn');
+        btn.disabled = true;
+        btn.textContent = 'Guardando…';
+        var r   = lastRefuerzoResult;
+        var pos = refuerzoModalPos;
+        var entry = {
+            date:         new Date().toISOString().split('T')[0],
+            contracts:    r.newCtrs,
+            pricePerUnit: r.curPricePerUnit,
+            investment:   r.newInv,
+            buyFee:       r.buyFee
+        };
+        await updateDoc(posDoc(pos.id), {
+            contracts:       r.totalCtrs,
+            totalCostBasis:  r.totalInv,
+            premium:         r.avgPricePerUnit,
+            breakevenPerUnit: r.bePerUnit,
+            refuerzos:       arrayUnion(entry)
+        });
+        closeRefuerzoModal();
+        syncHeader();
+        renderPositions(currentFilter);
     }
 
     // =========================================================
@@ -1640,6 +1683,7 @@
     window.openRefuerzoModal   = openRefuerzoModal;
     window.calcularRefuerzoModal = calcularRefuerzoModal;
     window.closeRefuerzoModal  = closeRefuerzoModal;
+    window.confirmRefuerzo     = confirmRefuerzo;
     window.loginWithGoogle     = loginWithGoogle;
     window.logoutUser          = logoutUser;
     window.closePretradeModal  = closePretradeModal;
