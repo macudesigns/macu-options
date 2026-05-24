@@ -254,6 +254,12 @@
 
             <!-- TAB: MERCADO -->
             <div id="noticias" class="tab-content">
+                <!-- USA legend -->
+                <div class="flex items-center gap-2 mb-4 px-1">
+                    <span class="text-lg">🇺🇸</span>
+                    <span class="text-sm font-semibold text-gray-500">Todos los datos corresponden al <strong class="text-gray-700">mercado de Estados Unidos (EE.UU.)</strong></span>
+                    <span class="ml-auto text-xs text-gray-400">Fuentes: FRED (Fed) &amp; Finnhub</span>
+                </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     <div class="card"><p class="label">Tasa de Interés (Fed)</p><p id="interest-rate" class="text-3xl font-bold text-indigo-600 mt-1">—</p><p id="interest-rate-date" class="text-xs text-gray-400 mt-1"></p></div>
                     <div class="card"><p class="label">Desempleo (UNRATE)</p><p id="unemployment-rate" class="text-3xl font-bold text-indigo-600 mt-1">—</p><p id="unemployment-rate-date" class="text-xs text-gray-400 mt-1"></p></div>
@@ -275,9 +281,9 @@
                     </div>
                 </div>
                 <div class="card">
-                    <h2 class="text-base font-bold text-gray-900 mb-4">📅 Próximos Reportes de Ganancias (Earnings)</h2>
+                    <h2 class="text-base font-bold text-gray-900 mb-4">📅 Próximos Reportes de Ganancias (Earnings) — 🇺🇸 EE.UU.</h2>
                     <div id="earnings-calendar" class="space-y-2"><p class="text-center text-gray-400 text-sm py-10">Cargando datos...</p></div>
-                    <p class="text-xs text-gray-400 mt-4 text-center">Datos de FRED &amp; Finnhub</p>
+                    <p class="text-xs text-gray-400 mt-4 text-center">Fuente: Finnhub &nbsp;·&nbsp; Datos del mercado estadounidense</p>
                 </div>
             </div>
 
@@ -1031,16 +1037,19 @@
             document.getElementById('inflation-rate').textContent      = parseFloat(infl.value).toFixed(1) + '%';
             document.getElementById('inflation-rate-date').textContent = 'Reporte: ' + infl.date;
 
-            var cal      = data.finnhubEcoData.economicCalendar || [];
-            var latestIR = cal.filter(function(e){ return e.event === 'US Interest Rate Decision'; }).pop();
-            var nextFomc = cal.find(function(e){ return new Date(e.time) > new Date() && e.event.includes('FOMC Statement'); });
-
-            if (latestIR && latestIR.actual) {
-                document.getElementById('interest-rate').textContent      = parseFloat(latestIR.actual).toFixed(2) + '%';
-                document.getElementById('interest-rate-date').textContent = 'Actualizado: ' + latestIR.time.split(' ')[0];
+            // Fed Funds Rate from FRED FEDFUNDS series (authoritative, always has data)
+            var fedfunds = data.fedfundsData && data.fedfundsData.observations && data.fedfundsData.observations[0];
+            if (fedfunds && fedfunds.value !== 'N/A') {
+                document.getElementById('interest-rate').textContent      = parseFloat(fedfunds.value).toFixed(2) + '%';
+                document.getElementById('interest-rate-date').textContent = 'Reporte: ' + fedfunds.date;
             } else {
-                document.getElementById('interest-rate').textContent = 'N/A';
+                document.getElementById('interest-rate').textContent      = 'N/A';
+                document.getElementById('interest-rate-date').textContent = '';
             }
+
+            var cal      = data.finnhubEcoData.economicCalendar || [];
+            var nextFomc = cal.find(function(e){ return new Date(e.time) > new Date() && (e.event.includes('FOMC') || e.event.includes('Interest Rate')); });
+
             document.getElementById('fomc-date').textContent = nextFomc
                 ? new Date(nextFomc.time).toLocaleDateString('es-ES', { day:'numeric', month:'short' })
                 : 'Por confirmar';
@@ -1049,9 +1058,19 @@
             var earnings   = (data.finnhubEarningsData.earningsCalendar || []).slice(0, 15);
             earningsEl.innerHTML = earnings.length > 0
                 ? earnings.map(function(e) {
-                    return '<div class="flex justify-between items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">' +
-                        '<div class="flex items-center gap-3"><span class="font-bold text-indigo-600 font-mono w-16 text-sm">' + esc(e.symbol) + '</span><span class="text-xs text-gray-400">' + e.date + '</span></div>' +
-                        '<div class="text-xs text-gray-500">Est: <strong>' + (e.epsEstimate != null ? e.epsEstimate : 'N/A') + '</strong> &nbsp;|&nbsp; Real: <strong>' + (e.epsActual != null ? e.epsActual : 'N/A') + '</strong></div>' +
+                    var name = e.companyName ? esc(e.companyName) : '';
+                    return '<div class="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors gap-2">' +
+                        '<div class="flex items-center gap-3 min-w-0">' +
+                            '<span class="font-bold text-indigo-600 font-mono text-sm flex-shrink-0 w-14">' + esc(e.symbol) + '</span>' +
+                            '<div class="min-w-0">' +
+                                (name ? '<p class="text-sm font-medium text-gray-700 truncate">' + name + '</p>' : '') +
+                                '<p class="text-xs text-gray-400">' + e.date + '</p>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="text-xs text-gray-500 flex-shrink-0 text-right">' +
+                            '<span>EPS Est: <strong>' + (e.epsEstimate != null ? e.epsEstimate : 'N/A') + '</strong></span>' +
+                            (e.epsActual != null ? '<br><span class="text-emerald-600">Real: <strong>' + e.epsActual + '</strong></span>' : '') +
+                        '</div>' +
                     '</div>';
                 }).join('')
                 : '<p class="text-center text-gray-400 py-8 text-sm">No hay reportes próximos.</p>';
