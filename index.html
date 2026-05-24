@@ -365,22 +365,37 @@
                                 </div>
                                 <input type="hidden" id="inv-type" value="house">
                             </div>
-                            <div><label class="label">Precio de Contado / Valor Real del Bien (USD)</label><input type="number" id="inv-cash-price" placeholder="ej: 300,000 (opcional)" step="0.01" class="input-field"></div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div><label class="label">Monto del Préstamo (USD)</label><input type="number" id="inv-loan" placeholder="ej: 250,000" step="0.01" class="input-field"></div>
-                                <div><label class="label">Enganche / Down Payment (USD)</label><input type="number" id="inv-down" placeholder="ej: 50,000" step="0.01" class="input-field"></div>
+                            <!-- === EL BIEN / EL ACTIVO === -->
+                            <div class="border-t border-gray-100 pt-1">
+                                <p class="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">🏷️ El Bien / El Activo</p>
+                                <div>
+                                    <label class="label">Precio de Contado — Valor real del bien (USD)</label>
+                                    <input type="number" id="inv-cash-price" placeholder="ej: 300,000 (opcional)" step="0.01" class="input-field">
+                                    <p class="text-xs text-gray-400 mt-1">¿Cuánto costaría pagarlo en efectivo hoy? (sin financiamiento)</p>
+                                </div>
                             </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div><label class="label">Tasa de Interés Anual (%)</label><input type="number" id="inv-rate" placeholder="ej: 6.5" step="0.01" class="input-field"></div>
-                                <div><label class="label">Plazo (años)</label><input type="number" id="inv-years" placeholder="ej: 30" step="0.5" class="input-field"></div>
+                            <!-- === EL PRÉSTAMO === -->
+                            <div class="border-t border-gray-100 pt-1">
+                                <p class="text-xs font-bold text-red-500 uppercase tracking-widest mb-3">💸 El Préstamo / Financiamiento</p>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div><label class="label">Monto del Préstamo (USD)</label><input type="number" id="inv-loan" placeholder="ej: 250,000" step="0.01" class="input-field"></div>
+                                    <div><label class="label">Enganche / Down Payment (USD)</label><input type="number" id="inv-down" placeholder="ej: 50,000" step="0.01" class="input-field"></div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3 mt-3">
+                                    <div><label class="label">Tasa de Interés Anual (%)</label><input type="number" id="inv-rate" placeholder="ej: 6.5" step="0.01" class="input-field"></div>
+                                    <div><label class="label">Plazo (años)</label><input type="number" id="inv-years" placeholder="ej: 30" step="0.5" class="input-field"></div>
+                                </div>
                             </div>
-                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Gastos Mensuales Adicionales</p>
-                            <div class="grid grid-cols-3 gap-3">
-                                <div><label class="label">Seguro</label><input type="number" id="inv-insurance" placeholder="ej: 150" step="0.01" class="input-field"></div>
-                                <div><label class="label">Mantenimiento</label><input type="number" id="inv-maintenance" placeholder="ej: 200" step="0.01" class="input-field"></div>
-                                <div><label class="label">Otros</label><input type="number" id="inv-other" placeholder="ej: 100" step="0.01" class="input-field"></div>
+                            <!-- === GASTOS ADICIONALES === -->
+                            <div class="border-t border-gray-100 pt-1">
+                                <p class="text-xs font-bold text-amber-500 uppercase tracking-widest mb-3">📋 Gastos Mensuales Adicionales</p>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div><label class="label">Seguro</label><input type="number" id="inv-insurance" placeholder="ej: 150" step="0.01" class="input-field"></div>
+                                    <div><label class="label">Mantenimiento</label><input type="number" id="inv-maintenance" placeholder="ej: 200" step="0.01" class="input-field"></div>
+                                    <div><label class="label">Otros</label><input type="number" id="inv-other" placeholder="ej: 100" step="0.01" class="input-field"></div>
+                                </div>
+                                <div class="mt-3"><label class="label">Inflación Anual Esperada (%)</label><input type="number" id="inv-inflation" placeholder="ej: 3.5 (opcional)" step="0.1" class="input-field"></div>
                             </div>
-                            <div><label class="label">Inflación Anual Esperada (%)</label><input type="number" id="inv-inflation" placeholder="ej: 3.5 (opcional)" step="0.1" class="input-field"></div>
                             <div class="flex gap-2 mt-2">
                                 <button type="button" onclick="calcularInversion()" class="btn-primary flex-1">Analizar Inversión</button>
                                 <button type="button" onclick="resetInversion()" class="flex-none py-2 px-4 rounded-lg border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition-colors">↺ Limpiar</button>
@@ -1459,13 +1474,15 @@
         var mExtras    = insurance + maintenance + other;
         var typeMap = { house:'🏠 Hipoteca', car:'🚗 Auto', phone:'📱 Smartphone', personal:'💰 Personal', school:'🎓 Estudiantil', other2:'⚡ Otro' };
         var typeLabel = typeMap[document.getElementById('inv-type').value] || '💰 Préstamo';
+        // Financing cost = everything you pay ON TOP of the asset itself
+        var financingCost = totalInt + extras;
+        // Verdict based on financing cost vs asset value
         var verdict = '', vClass = '';
-        if (cashPrice > 0) {
-            var pct = ((totalCost - cashPrice) / cashPrice) * 100;
-            if (pct <= 15)      { verdict = '✅ Costo razonable (+' + pct.toFixed(1) + '%)'; vClass = 'text-emerald-700 bg-emerald-50 border-emerald-200'; }
-            else if (pct <= 40) { verdict = '⚠️ Costo moderado (+' + pct.toFixed(1) + '%)';  vClass = 'text-amber-700 bg-amber-50 border-amber-200'; }
-            else                { verdict = '🚨 Costo elevado (+' + pct.toFixed(1) + '%)';   vClass = 'text-red-700 bg-red-50 border-red-200'; }
-        }
+        var base = cashPrice > 0 ? cashPrice : loanAmount;
+        var pct = (financingCost / base) * 100;
+        if (pct <= 15)      { verdict = '✅ Financiamiento razonable (+' + pct.toFixed(1) + '%)'; vClass = 'text-emerald-700 bg-emerald-50 border-emerald-200'; }
+        else if (pct <= 40) { verdict = '⚠️ Financiamiento moderado (+' + pct.toFixed(1) + '%)';  vClass = 'text-amber-700 bg-amber-50 border-amber-200'; }
+        else                { verdict = '🚨 Financiamiento costoso (+' + pct.toFixed(1) + '%)';   vClass = 'text-red-700 bg-red-50 border-red-200'; }
         function dRow(lbl, val, color) {
             var c = { gray:'text-gray-700', red:'text-red-600', amber:'text-amber-600', indigo:'text-indigo-700', green:'text-emerald-600' };
             return '<div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"><span class="text-sm text-gray-500">' + lbl + '</span><span class="text-sm font-bold ' + (c[color]||'text-gray-700') + '">' + val + '</span></div>';
@@ -1476,22 +1493,44 @@
             infNote = '<div class="mt-3 p-3 bg-amber-50 border border-amber-100 rounded-lg text-xs text-amber-700"><strong>📉 Efecto inflación (' + inflation + '% anual):</strong> Tu cuota de ' + fmt(mpay) + '/mes hoy tendrá el poder adquisitivo de ' + fmt(eqFuture) + ' al final del plazo.</div>';
         }
         document.getElementById('inv-result').innerHTML =
+            // Header
             '<div class="flex items-start justify-between gap-2 mb-4">' +
                 '<span class="font-bold text-gray-800">' + typeLabel + '</span>' +
-                (verdict ? '<span class="text-xs font-semibold px-2 py-1 rounded-lg border ' + vClass + '">' + verdict + '</span>' : '') +
+                '<span class="text-xs font-semibold px-2 py-1 rounded-lg border ' + vClass + '">' + verdict + '</span>' +
             '</div>' +
-            '<div class="grid grid-cols-2 gap-3 mb-4">' +
-                '<div class="bg-indigo-600 rounded-xl p-3 text-center"><p class="text-indigo-200 text-xs mb-0.5">Cuota Mensual</p><p class="text-white font-extrabold text-xl">' + fmt(mpay) + '</p>' + (mExtras > 0 ? '<p class="text-indigo-200 text-xs mt-0.5">Con extras: ' + fmt(mpay + mExtras) + '/mes</p>' : '') + '</div>' +
-                '<div class="bg-red-50 border border-red-100 rounded-xl p-3 text-center"><p class="text-xs text-gray-400 mb-0.5">Total Intereses</p><p class="font-bold text-red-600 text-xl">' + fmt(totalInt) + '</p><p class="text-xs text-gray-400">(' + ((totalInt/loanAmount)*100).toFixed(1) + '% del préstamo)</p></div>' +
+            // ── Section 1: El Bien ──
+            '<div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 mb-3">' +
+                '<p class="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-3">🏷️ El Bien / El Activo</p>' +
+                '<div class="space-y-0 divide-y divide-emerald-100">' +
+                    (cashPrice > 0 ?
+                        '<div class="flex justify-between py-2"><span class="text-sm text-gray-600">Valor de contado (sin financiar)</span><span class="text-sm font-bold text-emerald-700">' + fmt(cashPrice) + '</span></div>' : '') +
+                    (downPay > 0 ?
+                        '<div class="flex justify-between py-2"><span class="text-sm text-gray-600">Enganche / Down Payment</span><span class="text-sm font-bold text-gray-700">' + fmt(downPay) + '</span></div>' : '') +
+                    '<div class="flex justify-between py-2"><span class="text-sm text-gray-600">Capital del préstamo</span><span class="text-sm font-bold text-gray-700">' + fmt(principal) + '</span></div>' +
+                    '<div class="flex justify-between py-2 border-t-2 border-emerald-300"><span class="text-sm font-bold text-emerald-800">Total pagado por el bien</span><span class="text-sm font-extrabold text-emerald-800">' + fmt(loanAmount) + '</span></div>' +
+                '</div>' +
             '</div>' +
-            '<div class="border border-gray-100 rounded-xl overflow-hidden mb-3">' +
-                (cashPrice > 0 ? dRow('Precio de contado', fmt(cashPrice), 'green') : '') +
-                dRow('Monto del préstamo', fmt(loanAmount), 'gray') +
-                (downPay > 0 ? dRow('Enganche inicial', fmt(downPay), 'gray') : '') +
-                dRow('Total pagado al banco', fmt(totalLoan), 'red') +
-                (extras > 0 ? dRow('Gastos extras (' + months + ' meses)', fmt(extras), 'amber') : '') +
-                dRow('Costo total real', fmt(totalCost), 'indigo') +
-                (cashPrice > 0 ? dRow('Pagas de más vs contado', '+' + fmt(totalCost - cashPrice), totalCost - cashPrice > cashPrice * 0.4 ? 'red' : 'amber') : '') +
+            // ── Section 2: El Préstamo ──
+            '<div class="rounded-xl border border-red-200 bg-red-50 p-4 mb-3">' +
+                '<p class="text-xs font-bold text-red-600 uppercase tracking-widest mb-3">💸 Costo del Préstamo / Financiamiento</p>' +
+                '<div class="grid grid-cols-2 gap-3 mb-3">' +
+                    '<div class="bg-white rounded-lg p-3 text-center border border-red-100"><p class="text-xs text-gray-400 mb-0.5">Cuota Mensual</p><p class="text-xl font-extrabold text-red-600">' + fmt(mpay) + '</p>' + (mExtras > 0 ? '<p class="text-xs text-gray-400 mt-0.5">Con extras: ' + fmt(mpay + mExtras) + '/mes</p>' : '') + '</div>' +
+                    '<div class="bg-white rounded-lg p-3 text-center border border-red-100"><p class="text-xs text-gray-400 mb-0.5">Total Intereses Pagados</p><p class="text-xl font-extrabold text-red-600">' + fmt(totalInt) + '</p><p class="text-xs text-gray-400">(' + ((totalInt/principal)*100).toFixed(1) + '% del capital)</p></div>' +
+                '</div>' +
+                '<div class="space-y-0 divide-y divide-red-100">' +
+                    '<div class="flex justify-between py-2"><span class="text-sm text-gray-600">Intereses pagados (' + months + ' meses)</span><span class="text-sm font-bold text-red-600">' + fmt(totalInt) + '</span></div>' +
+                    (extras > 0 ? '<div class="flex justify-between py-2"><span class="text-sm text-gray-600">Gastos adicionales (' + months + ' meses)</span><span class="text-sm font-bold text-amber-600">' + fmt(extras) + '</span></div>' : '') +
+                    '<div class="flex justify-between py-2 border-t-2 border-red-300"><span class="text-sm font-bold text-red-700">Total que cuesta financiarlo</span><span class="text-sm font-extrabold text-red-700">' + fmt(financingCost) + '</span></div>' +
+                '</div>' +
+            '</div>' +
+            // ── Section 3: Resumen ──
+            '<div class="rounded-xl border border-indigo-200 bg-indigo-50 p-4 mb-3">' +
+                '<p class="text-xs font-bold text-indigo-700 uppercase tracking-widest mb-2">📊 Costo Total Real</p>' +
+                '<div class="flex items-center justify-between">' +
+                    '<span class="text-sm text-gray-600">El bien (' + fmt(loanAmount) + ') + financiamiento (' + fmt(financingCost) + ')</span>' +
+                    '<span class="text-lg font-extrabold text-indigo-700">' + fmt(totalCost) + '</span>' +
+                '</div>' +
+                (cashPrice > 0 ? '<div class="flex justify-between mt-2 pt-2 border-t border-indigo-200"><span class="text-sm text-gray-600">Pagas de más vs compra de contado</span><span class="text-sm font-bold ' + (totalCost - cashPrice > cashPrice * 0.4 ? 'text-red-600' : 'text-amber-600') + '">+' + fmt(totalCost - cashPrice) + ' (+' + (((totalCost - cashPrice)/cashPrice)*100).toFixed(1) + '%)</span></div>' : '') +
             '</div>' +
             infNote +
             '<div class="p-3 bg-gray-50 rounded-lg text-xs text-gray-500"><strong>Parámetros:</strong> ' + fmt(loanAmount) + ' al ' + annualRate + '% anual · ' + years + ' años (' + months + ' meses)</div>';
