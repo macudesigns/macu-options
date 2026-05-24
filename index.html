@@ -31,6 +31,7 @@
         .btn-success { background: #059669; color: #fff; font-weight: 700; padding: 0.75rem 1rem; border-radius: 0.625rem; box-shadow: 0 2px 8px rgba(5,150,105,0.2); transition: background 0.15s; border: none; cursor: pointer; width: 100%; font-size: 0.9rem; }
         .btn-success:hover { background: #047857; }
         .card { background: #fff; border-radius: 0.875rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1.5px solid #f1f5f9; padding: 1.5rem; }
+        body.modal-open { overflow: hidden; }
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -533,6 +534,49 @@
         </div>
     </div>
 
+    <!-- REFUERZO MODAL -->
+    <div id="refuerzo-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background:rgba(15,23,42,0.72)">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg" style="max-height:90vh;overflow-y:auto">
+            <div class="bg-indigo-600 rounded-t-2xl px-6 py-4 flex items-center justify-between">
+                <h3 class="text-white font-bold text-base">🔧 Estrategia de Refuerzo</h3>
+                <button onclick="closeRefuerzoModal()" class="text-indigo-200 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div id="refuerzo-modal-summary" class="px-5 py-4 bg-slate-50 border-b border-slate-100"></div>
+            <div class="px-6 py-5 space-y-4">
+                <div id="refuerzo-modal-error" class="hidden text-sm text-red-700 bg-red-50 border border-red-200 p-3 rounded-lg"></div>
+                <div>
+                    <label class="label">Precio actual por unidad (premium actual)</label>
+                    <input type="number" id="ref-cur-premium" placeholder="ej: 0.15" step="0.0001" class="input-field">
+                    <p class="text-xs text-gray-400 mt-1">Precio de mercado actual de la opción &nbsp;·&nbsp; 1 contrato = 100 unidades</p>
+                </div>
+                <div>
+                    <label class="label">Presupuesto de refuerzo (USD)</label>
+                    <input type="number" id="ref-budget" placeholder="ej: 500" step="0.01" class="input-field">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="label">Fees de compra (nuevos contratos)</label>
+                        <input type="number" id="ref-buy-fee" placeholder="ej: 2.50" step="0.01" class="input-field" style="background:#fffbeb">
+                    </div>
+                    <div>
+                        <label class="label">Fees de venta (posición total)</label>
+                        <input type="number" id="ref-sell-fee" placeholder="ej: 5.00" step="0.01" class="input-field" style="background:#fffbeb">
+                        <p class="text-xs text-gray-400 mt-1">Para vender TODOS los contratos</p>
+                    </div>
+                </div>
+                <div class="flex gap-2 pt-1">
+                    <button type="button" onclick="calcularRefuerzoModal()" class="btn-primary flex-1">Calcular Refuerzo</button>
+                    <button type="button" onclick="closeRefuerzoModal()" class="flex-none py-2 px-4 rounded-lg border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition-colors">Cancelar</button>
+                </div>
+                <div id="refuerzo-modal-result-container" class="hidden pt-2">
+                    <div id="refuerzo-modal-result"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
     // =========================================================
     //  FIREBASE
@@ -830,6 +874,7 @@
             : '<span class="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">✓ Sin earnings hoy</span>';
         updateModalCounter();
         // Show modal
+        document.body.classList.add('modal-open');
         var modal = document.getElementById('pretrade-modal');
         modal.classList.remove('hidden');
         modal.style.display = 'flex';
@@ -843,6 +888,7 @@
     }
 
     function closePretradeModal() {
+        document.body.classList.remove('modal-open');
         var modal = document.getElementById('pretrade-modal');
         modal.classList.add('hidden');
         modal.style.display = 'none';
@@ -950,7 +996,8 @@
             var expiLabel = p.expiration ? new Date(p.expiration + 'T12:00:00').toLocaleDateString('es-ES', {day:'numeric', month:'short', year:'numeric'}) : '—';
             var isExpired = p.expiration && new Date(p.expiration + 'T12:00:00') < new Date() && p.status === 'open';
             var actions   = p.status === 'open'
-                ? '<button onclick="updateStatus(' + p.id + ',\'win\')"  class="px-3 py-1.5 text-xs font-bold bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg transition-colors">✅ Ganada</button>' +
+                ? '<button onclick="openRefuerzoModal(' + p.id + ')" class="px-3 py-1.5 text-xs font-bold bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg transition-colors">🔧 Refuerzo</button>' +
+                  '<button onclick="updateStatus(' + p.id + ',\'win\')"  class="px-3 py-1.5 text-xs font-bold bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg transition-colors ml-2">✅ Ganada</button>' +
                   '<button onclick="updateStatus(' + p.id + ',\'loss\')" class="px-3 py-1.5 text-xs font-bold bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors ml-2">❌ Perdida</button>'
                 : '<button onclick="updateStatus(' + p.id + ',\'open\')" class="px-3 py-1.5 text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors">↩ Reabrir</button>';
             return '<div class="pos-card ' + s.bg + ' border ' + s.border + ' rounded-xl p-5">' +
@@ -1184,6 +1231,92 @@
     }
 
     // =========================================================
+    //  REFUERZO MODAL
+    // =========================================================
+    var refuerzoModalPos = null;
+
+    function openRefuerzoModal(posId) {
+        getPositions().then(function(all) {
+            var pos = all.find(function(p){ return p.id == posId; });
+            if (!pos) return;
+            refuerzoModalPos = pos;
+            document.getElementById('ref-cur-premium').value = pos.premium || '';
+            document.getElementById('ref-budget').value      = '';
+            document.getElementById('ref-buy-fee').value     = pos.entryCommissions || '';
+            document.getElementById('ref-sell-fee').value    = pos.sellCommissions  || '';
+            document.getElementById('refuerzo-modal-error').classList.add('hidden');
+            document.getElementById('refuerzo-modal-result-container').classList.add('hidden');
+            var typeLabel = pos.tipo === 'call' ? '📈 Call' : '📉 Put';
+            var typeColor = pos.tipo === 'call' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700';
+            var avgPerUnit = pos.totalCostBasis / (pos.contracts * 100);
+            document.getElementById('refuerzo-modal-summary').innerHTML =
+                '<div class="flex flex-wrap items-center gap-2 mb-3">' +
+                    '<span class="text-xl font-extrabold font-mono text-gray-900">' + esc(pos.ticker) + '</span>' +
+                    '<span class="px-2 py-0.5 text-xs font-bold rounded-full ' + typeColor + '">' + typeLabel + '</span>' +
+                '</div>' +
+                '<div class="grid grid-cols-3 gap-2 text-center">' +
+                    '<div class="bg-white rounded-lg p-2 border border-gray-100"><p class="text-xs text-gray-400">Contratos</p><p class="font-bold text-gray-800">' + pos.contracts + '</p></div>' +
+                    '<div class="bg-white rounded-lg p-2 border border-gray-100"><p class="text-xs text-gray-400">Inversión actual</p><p class="font-bold text-gray-800">' + fmt(pos.totalCostBasis) + '</p></div>' +
+                    '<div class="bg-white rounded-lg p-2 border border-gray-100"><p class="text-xs text-gray-400">Costo prom / u</p><p class="font-bold text-gray-800 font-mono">' + avgPerUnit.toFixed(4) + '</p></div>' +
+                '</div>';
+            document.body.classList.add('modal-open');
+            var modal = document.getElementById('refuerzo-modal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        });
+    }
+
+    function calcularRefuerzoModal() {
+        if (!refuerzoModalPos) return;
+        var pos     = refuerzoModalPos;
+        var curPrem = parseFloat(document.getElementById('ref-cur-premium').value);
+        var budget  = parseFloat(document.getElementById('ref-budget').value);
+        var buyFee  = parseFloat(document.getElementById('ref-buy-fee').value)  || 0;
+        var sellFee = parseFloat(document.getElementById('ref-sell-fee').value) || 0;
+        var errEl   = document.getElementById('refuerzo-modal-error');
+        errEl.classList.add('hidden');
+        if (isNaN(curPrem) || curPrem <= 0 || isNaN(budget) || budget <= 0) {
+            errEl.textContent = 'Ingresa el precio actual por unidad y el presupuesto de refuerzo.';
+            errEl.classList.remove('hidden'); return;
+        }
+        var costPerContract = curPrem * 100;
+        var newCtrs = Math.floor((budget - buyFee) / costPerContract);
+        if (newCtrs <= 0) {
+            errEl.textContent = 'El presupuesto no alcanza para comprar ningún contrato a ese precio (revisa los fees).';
+            errEl.classList.remove('hidden'); return;
+        }
+        var actualSpend      = newCtrs * costPerContract + buyFee;
+        var totalCtrs        = pos.contracts + newCtrs;
+        var totalInvestment  = pos.totalCostBasis + actualSpend;
+        var newAvgPerUnit    = totalInvestment / (totalCtrs * 100);
+        var breakevenPerUnit = (totalInvestment + sellFee) / (totalCtrs * 100);
+        document.getElementById('refuerzo-modal-result').innerHTML =
+            '<div class="grid grid-cols-2 gap-3 mb-3">' +
+                '<div class="bg-gray-50 border rounded-xl p-3 text-center"><p class="text-xs text-gray-400 mb-0.5">Contratos a Comprar</p><p class="text-2xl font-extrabold text-indigo-600">' + newCtrs + '</p></div>' +
+                '<div class="bg-gray-50 border rounded-xl p-3 text-center"><p class="text-xs text-gray-400 mb-0.5">Inversión Adicional</p><p class="text-2xl font-extrabold text-indigo-600">' + fmt(actualSpend) + '</p>' + (buyFee > 0 ? '<p class="text-xs text-gray-400">incl. ' + fmt(buyFee) + ' fees compra</p>' : '') + '</div>' +
+            '</div>' +
+            '<div class="border border-indigo-100 bg-indigo-50 rounded-xl p-4">' +
+                '<p class="text-xs font-bold text-indigo-700 uppercase tracking-widest mb-3">Posición Combinada</p>' +
+                '<div class="space-y-2 text-sm">' +
+                    '<div class="flex justify-between"><span class="text-gray-600">Contratos totales:</span><span class="font-bold">' + totalCtrs + '</span></div>' +
+                    '<div class="flex justify-between"><span class="text-gray-600">Inversión total:</span><span class="font-bold">' + fmt(totalInvestment) + '</span></div>' +
+                    '<div class="flex justify-between"><span class="text-gray-600">Nuevo costo prom / unidad:</span><span class="font-bold font-mono">' + newAvgPerUnit.toFixed(4) + '</span></div>' +
+                    '<div class="flex justify-between border-t pt-2 mt-1 font-bold text-indigo-700"><span>Breakeven (c/fees venta):</span><span class="font-mono">' + breakevenPerUnit.toFixed(4) + ' / u</span></div>' +
+                    '<div class="flex justify-between text-xs text-gray-400"><span>= por contrato:</span><span class="font-mono">' + fmt(breakevenPerUnit * 100) + '</span></div>' +
+                '</div>' +
+            '</div>';
+        document.getElementById('refuerzo-modal-result-container').classList.remove('hidden');
+    }
+
+    function closeRefuerzoModal() {
+        document.body.classList.remove('modal-open');
+        var modal = document.getElementById('refuerzo-modal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        refuerzoModalPos = null;
+    }
+
+    // =========================================================
     //  REINFORCEMENT
     // =========================================================
     function calcularRefuerzo() {
@@ -1410,6 +1543,9 @@
     window.resetInversion      = resetInversion;
     window.setInvType          = setInvType;
     window.refreshMarketData   = function() { fetchAllEconomicData(true); };
+    window.openRefuerzoModal   = openRefuerzoModal;
+    window.calcularRefuerzoModal = calcularRefuerzoModal;
+    window.closeRefuerzoModal  = closeRefuerzoModal;
     window.loginWithGoogle     = loginWithGoogle;
     window.logoutUser          = logoutUser;
     window.closePretradeModal  = closePretradeModal;
