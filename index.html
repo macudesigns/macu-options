@@ -1401,7 +1401,36 @@
         var infLoss = FV - FVreal;
         var realGain = FVreal - contrib;
 
+        // "vs doing nothing" inflation banner
+        var inflBanner = '';
+        if (inf > 0 && P > 0) {
+            var noInvLossAmt = P - (P / Math.pow(1 + inf / 100, years));
+            var noInvLossPct = (noInvLossAmt / P * 100);
+            var realRateNet  = ((1 + rate / 100) / (1 + inf / 100) - 1) * 100;
+            var beating      = realRateNet > 0;
+            inflBanner =
+                '<div class="rounded-xl overflow-hidden border ' + (beating ? 'border-emerald-200' : 'border-red-200') + ' mb-4">' +
+                    '<div class="' + (beating ? 'bg-emerald-600' : 'bg-red-600') + ' px-4 py-3 text-center">' +
+                        '<p class="text-white font-bold text-sm">' + (beating ? '✅ Tu rendimiento supera la inflación' : '🚨 La inflación supera tu rendimiento') + '</p>' +
+                        '<p class="text-white/80 text-xs mt-0.5">Rendimiento real neto: ' + (realRateNet >= 0 ? '+' : '') + realRateNet.toFixed(2) + '% anual</p>' +
+                    '</div>' +
+                    '<div class="grid grid-cols-2 divide-x divide-gray-200">' +
+                        '<div class="bg-red-50 p-4 text-center">' +
+                            '<p class="text-xs font-bold text-red-600 uppercase tracking-wide mb-2">💸 Sin invertir (inflación pura)</p>' +
+                            '<p class="text-2xl font-extrabold text-red-600">-' + fmt(noInvLossAmt) + '</p>' +
+                            '<p class="text-xs text-gray-500 mt-1">Tu ' + fmt(P) + ' pierde <strong>' + noInvLossPct.toFixed(1) + '%</strong> de poder<br>adquisitivo en ' + years + ' años dejando el dinero quieto</p>' +
+                        '</div>' +
+                        '<div class="' + (beating ? 'bg-emerald-50' : 'bg-red-50') + ' p-4 text-center">' +
+                            '<p class="text-xs font-bold ' + (beating ? 'text-emerald-700' : 'text-red-600') + ' uppercase tracking-wide mb-2">' + (beating ? '📈 Con tu inversión (' + rate + '%)' : '📉 Con tu inversión (' + rate + '%)') + '</p>' +
+                            '<p class="text-2xl font-extrabold ' + (beating ? 'text-emerald-700' : 'text-red-600') + '">' + (realGain >= 0 ? '+' : '') + fmt(realGain) + '</p>' +
+                            '<p class="text-xs text-gray-500 mt-1">Ganancia real neta en poder<br>adquisitivo de hoy<br>(' + (realRateNet >= 0 ? '+' : '') + realRateNet.toFixed(2) + '%/año real neto)</p>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+        }
+
         document.getElementById('ci-result').innerHTML =
+            inflBanner +
             '<div class="grid grid-cols-2 gap-3 mb-4">' +
                 '<div class="bg-indigo-600 rounded-xl p-4 text-center"><p class="text-indigo-200 text-xs mb-1">Capital Final Nominal</p><p class="text-white font-extrabold text-2xl">' + fmt(FV) + '</p></div>' +
                 '<div class="bg-emerald-600 rounded-xl p-4 text-center"><p class="text-emerald-100 text-xs mb-1">Valor Real (poder adquisitivo hoy)</p><p class="text-white font-extrabold text-2xl">' + fmt(FVreal) + '</p></div>' +
@@ -1501,8 +1530,32 @@
         }
         var infNote = '';
         if (inflation > 0) {
-            var eqFuture = mpay * Math.pow(1 + inflation / 100, years);
-            infNote = '<div class="mt-3 p-3 bg-amber-50 border border-amber-100 rounded-lg text-xs text-amber-700"><strong>📉 Efecto inflación (' + inflation + '% anual):</strong> Tu cuota de ' + fmt(mpay) + '/mes hoy tendrá el poder adquisitivo de ' + fmt(eqFuture) + ' al final del plazo.</div>';
+            var cashBase       = cashPrice > 0 ? cashPrice : loanAmount;
+            var cashBaseReal   = cashBase / Math.pow(1 + inflation / 100, years);
+            var cashBaseLoss   = cashBase - cashBaseReal;
+            var cashBaseLossPct = (cashBaseLoss / cashBase * 100);
+            var lastPayReal    = mpay / Math.pow(1 + inflation / 100, years);
+            var rInf           = inflation / 100 / 12;
+            var realTotalPay   = rInf > 0
+                ? (mpay * (1 - Math.pow(1 + rInf, -months)) / rInf) + downPay
+                : totalLoan;
+            infNote =
+                '<div class="rounded-xl border border-amber-200 bg-amber-50 p-4 mb-3">' +
+                    '<p class="text-xs font-bold text-amber-700 uppercase tracking-widest mb-3">📉 Efecto Inflación (' + inflation + '% anual)</p>' +
+                    '<div class="grid grid-cols-2 gap-3 mb-3">' +
+                        '<div class="bg-white rounded-lg p-3 border border-amber-100 text-center">' +
+                            '<p class="text-xs text-gray-400 mb-1">Si dejaras ' + fmt(cashBase) + '<br>en efectivo sin invertir:</p>' +
+                            '<p class="text-xl font-extrabold text-red-600">-' + fmt(cashBaseLoss) + '</p>' +
+                            '<p class="text-xs text-red-500 font-semibold mt-0.5">Pierdes ' + cashBaseLossPct.toFixed(1) + '% de poder<br>adquisitivo en ' + years + ' años</p>' +
+                        '</div>' +
+                        '<div class="bg-white rounded-lg p-3 border border-amber-100 text-center">' +
+                            '<p class="text-xs text-gray-400 mb-1">Costo real del préstamo<br>(pagos en $ de hoy):</p>' +
+                            '<p class="text-xl font-extrabold text-amber-700">' + fmt(realTotalPay) + '</p>' +
+                            '<p class="text-xs text-gray-500 mt-0.5">vs nominal ' + fmt(totalCost) + '<br>la inflación reduce ' + fmt(totalCost - realTotalPay) + '</p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<p class="text-xs text-amber-700">💡 La inflación <strong>beneficia a quien tiene deuda fija</strong>: pagas los últimos plazos con dólares que valen menos. Tu cuota de ' + fmt(mpay) + '/mes al final del plazo equivaldrá a solo <strong>' + fmt(lastPayReal) + '</strong> en poder adquisitivo de hoy.</p>' +
+                '</div>';
         }
         document.getElementById('inv-result').innerHTML =
             // Header
