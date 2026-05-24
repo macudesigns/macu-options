@@ -8,6 +8,7 @@ exports.handler = async function(event, context) {
     const commonFredParams = `api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=1`;
     const unemploymentUrl  = `${fredBaseUrl}?series_id=UNRATE&${commonFredParams}`;
     const inflationUrl     = `${fredBaseUrl}?series_id=CPIAUCSL&${commonFredParams}&units=pc1`;
+    const fedfundsUrl      = `${fredBaseUrl}?series_id=FEDFUNDS&${commonFredParams}`;
 
     const today   = new Date();
     const from    = today.toISOString().split('T')[0];
@@ -28,17 +29,34 @@ exports.handler = async function(event, context) {
         }
     }
 
-    const [unemploymentData, inflationData, finnhubEcoData, finnhubEarningsData] = await Promise.all([
-        safeFetch(unemploymentUrl,  { observations: [{ value: 'N/A', date: '—' }] }),
-        safeFetch(inflationUrl,     { observations: [{ value: 'N/A', date: '—' }] }),
-        safeFetch(finnhubEcoUrl,    { economicCalendar: [] }),
+    const [unemploymentData, inflationData, fedfundsData, finnhubEcoData, finnhubEarningsRaw] = await Promise.all([
+        safeFetch(unemploymentUrl,    { observations: [{ value: 'N/A', date: '—' }] }),
+        safeFetch(inflationUrl,       { observations: [{ value: 'N/A', date: '—' }] }),
+        safeFetch(fedfundsUrl,        { observations: [{ value: 'N/A', date: '—' }] }),
+        safeFetch(finnhubEcoUrl,      { economicCalendar: [] }),
         safeFetch(finnhubEarningsUrl, { earningsCalendar: [] })
     ]);
+
+    // Enrich earnings with company names via profile2
+    const earningsList = (finnhubEarningsRaw.earningsCalendar || []).slice(0, 15);
+    const symbols = [...new Set(earningsList.map(e => e.symbol))].slice(0, 12);
+    const profiles = await Promise.all(
+        symbols.map(sym =>
+            safeFetch(
+                `https://finnhub.io/api/v1/stock/profile2?symbol=${encodeURIComponent(sym)}&token=${FINNHUB_API_KEY}`,
+                { symbol: sym, name: '' }
+            )
+        )
+    );
+    const nameMap = {};
+    profiles.forEach(p => { if (p && p.symbol) nameMap[p.symbol] = p.name || ''; });
+    const enrichedEarnings = earningsList.map(e => ({ ...e, companyName: nameMap[e.symbol] || '' }));
+    const finnhubEarningsData = { earningsCalendar: enrichedEarnings };
 
     return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ unemploymentData, inflationData, finnhubEcoData, finnhubEarningsData })
+        body: JSON.stringify({ unemploymentData, inflationData, fedfundsData, finnhubEcoData, finnhubEarningsData })
     };
 };
 
