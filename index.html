@@ -74,7 +74,6 @@
             <button data-tab="#analisis"  class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all bg-indigo-50 text-indigo-700">📊 Análisis</button>
             <button data-tab="#diario"    class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">📁 Diario</button>
             <button data-tab="#noticias"  class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">📈 Mercado</button>
-            <button data-tab="#checklist" class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">✅ Checklist</button>
             <button data-tab="#refuerzo"  class="tab-btn flex-1 min-w-fit py-2 px-3 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:bg-gray-50">🔧 Refuerzo</button>
         </div>
 
@@ -287,57 +286,6 @@
                 </div>
             </div>
 
-            <!-- TAB: CHECKLIST -->
-            <div id="checklist" class="tab-content">
-                <div class="max-w-2xl mx-auto card">
-                    <h2 class="text-base font-bold text-gray-900 mb-5 pb-3 border-b">✅ Checklist Pre-Operación</h2>
-                    <form id="trade-checklist" class="space-y-6">
-                        <div>
-                            <h3 class="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-4"><span class="w-5 h-5 bg-indigo-100 text-indigo-600 rounded flex items-center justify-center text-xs font-bold">1</span>Análisis de Mercado</h3>
-                            <div class="space-y-4 pl-7">
-                                <fieldset>
-                                    <legend class="text-sm font-semibold text-gray-700 mb-2">¿Cuál es la tendencia principal del mercado?</legend>
-                                    <div class="flex gap-5">
-                                        <label class="flex items-center gap-2 cursor-pointer text-sm"><input type="radio" name="trend" value="bullish" class="text-indigo-600"> 📈 Alcista</label>
-                                        <label class="flex items-center gap-2 cursor-pointer text-sm"><input type="radio" name="trend" value="bearish" class="text-indigo-600"> 📉 Bajista</label>
-                                    </div>
-                                </fieldset>
-                                <fieldset>
-                                    <legend class="text-sm font-semibold text-gray-700 mb-2">¿Hay reunión de la Fed hoy?</legend>
-                                    <div id="fed-meeting-today" class="flex gap-5 text-gray-400 text-sm">Verificando...</div>
-                                </fieldset>
-                                <fieldset>
-                                    <legend class="text-sm font-semibold text-gray-700 mb-2">¿Estamos en temporada de earnings?</legend>
-                                    <div id="earnings-season-today" class="flex gap-5 text-gray-400 text-sm">Verificando...</div>
-                                    <p class="text-xs text-gray-400 italic mt-1.5">Regla: No operar la semana del earning, sino después.</p>
-                                </fieldset>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-4"><span class="w-5 h-5 bg-indigo-100 text-indigo-600 rounded flex items-center justify-center text-xs font-bold">2</span>Análisis Técnico</h3>
-                            <div class="space-y-2 pl-7">
-                                <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer text-sm"><input type="checkbox" class="h-4 w-4 text-indigo-600 rounded"> ¿Hay ruptura o rompimiento de la línea de tendencia?</label>
-                                <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer text-sm"><input type="checkbox" class="h-4 w-4 text-indigo-600 rounded"> ¿Hay un salto (gap) al alza o a la baja?</label>
-                                <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer text-sm"><input type="checkbox" class="h-4 w-4 text-indigo-600 rounded"> He marcado puntos de referencia en gráficos de 1D, 1H y 15M.</label>
-                                <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer text-sm"><input type="checkbox" class="h-4 w-4 text-indigo-600 rounded"> He marcado puntos de rebote en relación a las medias móviles (1D, 1H, 15M).</label>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-4"><span class="w-5 h-5 bg-indigo-100 text-indigo-600 rounded flex items-center justify-center text-xs font-bold">3</span>Ejecución</h3>
-                            <div class="space-y-2 pl-7">
-                                <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer text-sm"><input type="checkbox" class="h-4 w-4 text-indigo-600 rounded"> La entrada se basa en el gráfico de 15 minutos.</label>
-                                <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer text-sm"><input type="checkbox" class="h-4 w-4 text-indigo-600 rounded"> El spread entre Bid y Ask es aceptable.</label>
-                                <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer text-sm"><input type="checkbox" class="h-4 w-4 text-indigo-600 rounded"> El precio de compra está dentro del rango óptimo definido en Análisis.</label>
-                                <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer text-sm"><input type="checkbox" class="h-4 w-4 text-indigo-600 rounded"> La fecha de expiración es el próximo viernes (la más cercana).</label>
-                            </div>
-                        </div>
-                        <div class="pt-3 border-t">
-                            <button type="button" id="reset-checklist" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-lg transition-colors text-sm">Reiniciar Checklist</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
             <!-- TAB: REFUERZO -->
             <div id="refuerzo" class="tab-content">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -377,119 +325,110 @@
             <!-- Checklist body -->
             <div class="px-6 py-5 space-y-5">
 
-                <!-- Tendencia del Mercado -->
+                <!-- 1. Análisis de Mercado -->
                 <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">📊 Tendencia del Mercado</p>
+                    <h4 class="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
+                        <span class="w-5 h-5 bg-indigo-100 text-indigo-600 rounded flex items-center justify-center text-xs font-bold">1</span>
+                        Análisis de Mercado
+                    </h4>
                     <div class="space-y-2">
                         <div class="p-3 rounded-lg border border-gray-100 text-sm">
-                            <p class="font-medium text-gray-700 mb-2">¿Cuál es la tendencia principal?</p>
+                            <p class="font-medium text-gray-700 mb-2">¿Cuál es la tendencia principal del mercado?</p>
                             <div class="flex gap-5">
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="modal-trend" value="alcista" class="h-4 w-4 text-indigo-600 pretrade-check"> 📈 <strong>Alcista</strong></label>
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="modal-trend" value="bajista" class="h-4 w-4 text-indigo-600 pretrade-check"> 📉 <strong>Bajista</strong></label>
                             </div>
                         </div>
+                        <div class="p-3 rounded-lg border border-amber-100 bg-amber-50 text-sm">
+                            <p class="font-medium text-gray-700 mb-2">¿Hay reunión de la Fed hoy? <span id="modal-fed-badge" class="ml-1"></span></p>
+                            <div class="flex gap-5">
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="modal-fed" value="yes" class="h-4 w-4 text-indigo-600 pretrade-check"> Sí</label>
+                                <label class="flex items-center gap-2 cursor-pointer ml-4"><input type="radio" name="modal-fed" value="no" class="h-4 w-4 text-indigo-600 pretrade-check"> No</label>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-lg border border-amber-100 bg-amber-50 text-sm">
+                            <p class="font-medium text-gray-700 mb-2">¿Estamos en temporada de earnings? <span id="modal-earnings-badge" class="ml-1"></span></p>
+                            <div class="flex gap-5">
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="modal-earnings" value="yes" class="h-4 w-4 text-indigo-600 pretrade-check"> Sí</label>
+                                <label class="flex items-center gap-2 cursor-pointer ml-4"><input type="radio" name="modal-earnings" value="no" class="h-4 w-4 text-indigo-600 pretrade-check"> No</label>
+                            </div>
+                            <p class="text-xs text-amber-700 italic mt-1.5">⚠️ Regla: No operar la semana del earning, sino después.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Análisis Técnico -->
+                <div>
+                    <h4 class="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
+                        <span class="w-5 h-5 bg-indigo-100 text-indigo-600 rounded flex items-center justify-center text-xs font-bold">2</span>
+                        Análisis Técnico
+                    </h4>
+                    <div class="space-y-2">
                         <div class="p-3 rounded-lg border border-gray-100 text-sm">
                             <p class="font-medium text-gray-700 mb-2">¿Hay un gap (salto de precio)?</p>
-                            <div class="flex gap-5">
+                            <div class="flex flex-wrap gap-4">
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="modal-gap" value="alcista" class="h-4 w-4 text-indigo-600 pretrade-check"> 📈 <strong>Gap alcista</strong></label>
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="modal-gap" value="bajista" class="h-4 w-4 text-indigo-600 pretrade-check"> 📉 <strong>Gap bajista</strong></label>
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="modal-gap" value="ninguno" class="h-4 w-4 text-indigo-600 pretrade-check"> Sin gap</label>
                             </div>
                         </div>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>¿Hay <strong>ruptura o rompimiento</strong> de la línea de tendencia?</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>He confirmado la tendencia en el <strong>gráfico semanal (1W)</strong></span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>He confirmado la tendencia en el <strong>gráfico diario (1D)</strong></span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>He confirmado el contexto en el <strong>gráfico de 1 hora (1H)</strong></span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>He marcado niveles clave de <strong>soporte y resistencia</strong></span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>He marcado puntos de rebote en relación a las <strong>Medias Móviles (MA20, MA40, MA100, MA200)</strong></span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>He verificado las <strong>Bandas de Bollinger</strong> (banda inferior, superior o punto medio)</span>
+                        </label>
                     </div>
                 </div>
 
-                <!-- Análisis Multi-Temporalidad -->
+                <!-- 3. Ejecución -->
                 <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">🕐 Análisis Multi-Temporalidad</p>
+                    <h4 class="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
+                        <span class="w-5 h-5 bg-indigo-100 text-indigo-600 rounded flex items-center justify-center text-xs font-bold">3</span>
+                        Ejecución
+                    </h4>
                     <div class="space-y-2">
-                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
-                            <span>He revisado y confirmado la tendencia en el <strong>gráfico semanal (1W)</strong></span>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
-                            <span>He revisado y confirmado la tendencia en el <strong>gráfico diario (1D)</strong></span>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
-                            <span>He revisado y confirmado el contexto en el <strong>gráfico de 1 hora (1H)</strong></span>
-                        </label>
                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-emerald-50 cursor-pointer text-sm border border-emerald-100 transition-colors">
                             <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
                             <span>La <strong>entrada está basada en el gráfico de 15 minutos (15M)</strong> ✅</span>
                         </label>
-                    </div>
-                </div>
-
-                <!-- Condiciones de Mercado -->
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">⚠️ Condiciones de Mercado</p>
-                    <div class="space-y-2">
                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
                             <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
-                            <span>Confirmo que el <strong>spread Bid/Ask es aceptable</strong> para operar (no demasiado amplio)</span>
+                            <span>El <strong>spread Bid/Ask es aceptable</strong> para operar (no demasiado amplio)</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>El <strong>precio de compra está dentro del rango óptimo</strong> definido en el Análisis</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <span>La <strong>fecha de expiración es el próximo viernes</strong> (la más cercana)</span>
                         </label>
                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-amber-50 cursor-pointer text-sm border border-amber-100 transition-colors">
                             <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
-                            <span>No hay <strong>reunión de la Fed ni noticias de alto impacto</strong> programadas para hoy</span>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-amber-50 cursor-pointer text-sm border border-amber-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
-                            <span>No hay <strong>reporte de ganancias (Earnings)</strong> próximo que afecte al activo que estoy operando</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Soporte / Resistencia -->
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">📍 Niveles Clave</p>
-                    <div class="space-y-2">
-                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
-                            <span>El precio está tocando o reaccionando a un nivel clave de <strong>soporte o resistencia</strong></span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Medias Móviles -->
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">📈 Medias Móviles</p>
-                    <div class="space-y-2">
-                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
-                            <span>El precio está reaccionando a la <strong>Media Móvil de 20 períodos (MA20)</strong></span>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
-                            <span>El precio está reaccionando a la <strong>Media Móvil de 40 períodos (MA40)</strong></span>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
-                            <span>El precio está reaccionando a la <strong>Media Móvil de 100 períodos (MA100)</strong></span>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
-                            <span>El precio está reaccionando a la <strong>Media Móvil de 200 períodos (MA200)</strong></span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Bandas de Bollinger -->
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">🎯 Bandas de Bollinger</p>
-                    <div class="space-y-2">
-                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
-                            <span>El precio está reaccionando a la <strong>banda inferior</strong> de las Bandas de Bollinger</span>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
-                            <span>El precio está reaccionando a la <strong>banda superior</strong> de las Bandas de Bollinger</span>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
-                            <span>El precio está reaccionando al <strong>punto medio (línea central)</strong> de las Bandas de Bollinger</span>
+                            <span>No hay <strong>reporte de ganancias (Earnings)</strong> ni noticias de alto impacto que afecten al activo esta semana</span>
                         </label>
                     </div>
                 </div>
@@ -530,8 +469,10 @@
     const db       = getFirestore(app);
     const auth     = getAuth(app);
     const provider = new GoogleAuthProvider();
-    let   currentUser = null;
-    let   pendingPos   = null;
+    let   currentUser      = null;
+    let   pendingPos        = null;
+    let   marketFedToday    = false;
+    let   marketEarningsToday = false;
 
     // Helpers — user-scoped Firestore paths
     function posRef()   { return collection(db, 'users', currentUser.uid, 'positions'); }
@@ -557,7 +498,7 @@
             document.querySelector(target).classList.add('active');
 
             if (target === '#diario') renderPositions(currentFilter);
-            if ((target === '#noticias' || target === '#checklist') && !newsLoaded) {
+            if (target === '#noticias' && !newsLoaded) {
                 fetchAllEconomicData();
                 newsLoaded = true;
             }
@@ -792,8 +733,20 @@
                 '</div>' +
             '</div>' +
             '<p class="text-xs text-gray-400 mt-2">Break-even: <strong class="text-gray-600">' + pendingPos.breakevenPerUnit.toFixed(4) + '</strong> / unidad &nbsp;=&nbsp; <strong class="text-gray-600">' + fmt(pendingPos.breakevenPerUnit * 100) + '</strong> / contrato</p>';
-        // Reset checkboxes and counter
+        // Reset checkboxes/radios and apply auto-detected Fed & Earnings status
         document.querySelectorAll('.pretrade-check').forEach(function(c){ c.checked = false; });
+        var fedRadio = document.querySelector('input[name="modal-fed"][value="' + (marketFedToday ? 'yes' : 'no') + '"]');
+        if (fedRadio) fedRadio.checked = true;
+        var fedBadge = document.getElementById('modal-fed-badge');
+        if (fedBadge) fedBadge.innerHTML = marketFedToday
+            ? '<span class="text-xs font-semibold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">⚠️ Sí, hay reunión hoy</span>'
+            : '<span class="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">✓ No hay reunión hoy</span>';
+        var earningsRadio = document.querySelector('input[name="modal-earnings"][value="' + (marketEarningsToday ? 'yes' : 'no') + '"]');
+        if (earningsRadio) earningsRadio.checked = true;
+        var earnBadge = document.getElementById('modal-earnings-badge');
+        if (earnBadge) earnBadge.innerHTML = marketEarningsToday
+            ? '<span class="text-xs font-semibold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">⚠️ Sí, hay earnings hoy</span>'
+            : '<span class="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">✓ Sin earnings hoy</span>';
         updateModalCounter();
         // Show modal
         var modal = document.getElementById('pretrade-modal');
@@ -1076,15 +1029,8 @@
                 : '<p class="text-center text-gray-400 py-8 text-sm">No hay reportes próximos.</p>';
 
             var today    = new Date().toISOString().split('T')[0];
-            var fedToday = cal.some(function(e){ return e.event.includes('FOMC') && e.time.startsWith(today); });
-            document.getElementById('fed-meeting-today').innerHTML =
-                '<label class="flex items-center gap-2 cursor-pointer text-sm"><input type="radio" name="fed" value="yes" ' + (fedToday  ? 'checked' : '') + ' class="text-indigo-600"> Sí</label>' +
-                '<label class="flex items-center gap-2 cursor-pointer text-sm ml-4"><input type="radio" name="fed" value="no" ' + (!fedToday ? 'checked' : '') + ' class="text-indigo-600"> No</label>';
-
-            var earningsToday = (data.finnhubEarningsData.earningsCalendar || []).some(function(e){ return e.date === today; });
-            document.getElementById('earnings-season-today').innerHTML =
-                '<label class="flex items-center gap-2 cursor-pointer text-sm"><input type="radio" name="earnings" value="yes" ' + (earningsToday  ? 'checked' : '') + ' class="text-indigo-600"> Sí</label>' +
-                '<label class="flex items-center gap-2 cursor-pointer text-sm ml-4"><input type="radio" name="earnings" value="no" ' + (!earningsToday ? 'checked' : '') + ' class="text-indigo-600"> No</label>';
+            marketFedToday      = cal.some(function(e){ return e.event.includes('FOMC') && e.time.startsWith(today); });
+            marketEarningsToday = (data.finnhubEarningsData.earningsCalendar || []).some(function(e){ return e.date === today; });
 
         } catch(err) {
             console.error('Economic data error:', err);
@@ -1096,13 +1042,6 @@
             document.getElementById('earnings-calendar').innerHTML = '<p class="text-center text-gray-400 py-4 text-sm">Datos no disponibles.</p>';
         }
     }
-
-    // =========================================================
-    //  CHECKLIST
-    // =========================================================
-    document.getElementById('reset-checklist').addEventListener('click', function() {
-        document.getElementById('trade-checklist').reset();
-    });
 
     // =========================================================
     //  REINFORCEMENT
