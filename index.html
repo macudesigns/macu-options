@@ -976,10 +976,14 @@
         var closed   = wins + losses;
         var wr       = closed > 0 ? Math.round((wins / closed) * 100) : 0;
 
-        // Net P&L: wins add targetNetProfit, losses subtract full cost basis
+        // Net P&L: wins use live-computed profit (handles both "35" string and 0.35 decimal storage)
         var totalPnl = all.reduce(function(acc, p) {
-            if (p.status === 'win')  return acc + (p.targetNetProfit  || 0);
-            if (p.status === 'loss') return acc - (p.totalCostBasis   || 0);
+            if (p.status === 'win') {
+                var rp = parseFloat(p.targetProfitPct);
+                var pct = (!isNaN(rp) && rp > 0) ? (rp > 1 ? rp / 100 : rp) : 0;
+                return acc + (pct > 0 ? p.totalCostBasis * pct : (p.targetNetProfit || 0));
+            }
+            if (p.status === 'loss') return acc - (p.totalCostBasis || 0);
             return acc;
         }, 0);
 
@@ -1025,17 +1029,18 @@
             var origInv    = p.totalCostBasis - sumRefInv;
             var origPrem   = origCtrs > 0 ? (origInv / (origCtrs * 100)).toFixed(4) : (p.premium ? p.premium.toFixed(4) : '—');
             var avgPerUnit = p.contracts > 0 ? (p.totalCostBasis / (p.contracts * 100)).toFixed(4) : '—';
-            // Live-computed target values — always correct after refuerzos
-            var liveProfitPct         = typeof p.targetProfitPct === 'number' ? p.targetProfitPct : 0;
-            var liveUnits             = p.contracts * 100;
-            var liveSellComm          = p.sellCommissions || 0;
+            // Live-computed target values — handles both "35" (string/int %) and 0.35 (decimal) storage
+            var _rp               = parseFloat(p.targetProfitPct);
+            var liveProfitPct     = (!isNaN(_rp) && _rp > 0) ? (_rp > 1 ? _rp / 100 : _rp) : 0;
+            var liveUnits         = p.contracts * 100;
+            var liveSellComm      = p.sellCommissions || 0;
             var liveTargetSellPerUnit = liveProfitPct > 0 && liveUnits > 0
                 ? (p.totalCostBasis * (1 + liveProfitPct) + liveSellComm) / liveUnits
                 : p.targetSellPerUnit;
-            var liveTargetNetProfit   = liveProfitPct > 0
+            var liveTargetNetProfit = liveProfitPct > 0
                 ? p.totalCostBasis * liveProfitPct
                 : p.targetNetProfit;
-            var liveProfitPctDisplay  = liveProfitPct > 0 ? Math.round(liveProfitPct * 100) : (p.targetProfitPct || '?');
+            var liveProfitPctDisplay = liveProfitPct > 0 ? Math.round(liveProfitPct * 100) : (p.targetProfitPct || '?');
             var refHistoryHtml = '';
             if (refuerzos.length > 0) {
                 var rows = '<div class="flex items-center gap-2 py-1.5 border-b border-gray-100 text-xs">' +
@@ -1420,7 +1425,8 @@
             buyFee:       r.buyFee
         };
         var newUnits            = r.totalCtrs * 100;
-        var profitPct           = pos.targetProfitPct || 0;
+        var _rawPct             = parseFloat(pos.targetProfitPct);
+        var profitPct           = (!isNaN(_rawPct) && _rawPct > 0) ? (_rawPct > 1 ? _rawPct / 100 : _rawPct) : 0;
         var newSellComm         = pos.sellCommissions || 0;
         var newTargetSellPerUnit = profitPct > 0 && newUnits > 0
             ? (r.totalInv * (1 + profitPct) + newSellComm) / newUnits
