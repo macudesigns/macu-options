@@ -562,9 +562,12 @@
             <div class="px-6 py-5 space-y-4">
                 <div id="refuerzo-modal-error" class="hidden text-sm text-red-700 bg-red-50 border border-red-200 p-3 rounded-lg"></div>
                 <div>
-                    <label class="label">Costo actual por contrato (USD)</label>
-                    <input type="number" id="ref-cur-price" placeholder="ej: 48" step="0.01" class="input-field">
-                    <p class="text-xs text-gray-400 mt-1">Precio de mercado actual por contrato (= premium &times; 100)</p>
+                    <label class="label">Precio Actual / Unidad</label>
+                    <input type="number" id="ref-cur-price" placeholder="ej: 0.45" step="any" class="input-field">
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-lg px-4 py-2 flex items-center justify-between mt-2">
+                        <span class="text-sm text-indigo-700 font-medium">Costo por Contrato (× 100):</span>
+                        <span id="ref-cur-price-preview" class="text-base font-bold text-indigo-800 font-mono">—</span>
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -648,6 +651,12 @@
     document.getElementById('premium').addEventListener('input', () => {
         const v = parseFloat(document.getElementById('premium').value);
         document.getElementById('premiumRealValue').textContent =
+            (!isNaN(v) && v > 0) ? fmt(v * 100) : '—';
+    });
+
+    document.getElementById('ref-cur-price').addEventListener('input', function() {
+        const v = parseFloat(this.value);
+        document.getElementById('ref-cur-price-preview').textContent =
             (!isNaN(v) && v > 0) ? fmt(v * 100) : '—';
     });
 
@@ -1250,7 +1259,8 @@
             var pos = all.find(function(p){ return p.id == posId; });
             if (!pos) return;
             refuerzoModalPos = pos;
-            document.getElementById('ref-cur-price').value  = pos.premium ? (pos.premium * 100).toFixed(2) : '';
+            document.getElementById('ref-cur-price').value  = pos.premium ? pos.premium : '';
+            document.getElementById('ref-cur-price-preview').textContent = pos.premium ? fmt(pos.premium * 100) : '\u2014';
             document.getElementById('ref-buy-fee').value    = pos.entryCommissions || '';
             document.getElementById('ref-sell-fee').value   = pos.sellCommissions  || '';
             document.getElementById('refuerzo-modal-error').classList.add('hidden');
@@ -1278,7 +1288,7 @@
     function calcularRefuerzoModal() {
         if (!refuerzoModalPos) return;
         var pos      = refuerzoModalPos;
-        var curPrice = parseFloat(document.getElementById('ref-cur-price').value);  // per contract
+        var curPrice = parseFloat(document.getElementById('ref-cur-price').value) * 100;  // per unit × 100
         var buyFee   = parseFloat(document.getElementById('ref-buy-fee').value)  || 0;
         var sellFee  = parseFloat(document.getElementById('ref-sell-fee').value) || 0;
         var errEl    = document.getElementById('refuerzo-modal-error');
