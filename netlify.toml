@@ -1,6 +1,6 @@
 [build]
   publish   = "."
-  command   = "npm install && npx tailwindcss -i input.css -o output.css --minify"
+  command   = "npm install && npx @tailwindcss/cli -i input.css -o output.css --minify"
   functions = "netlify/functions"
 
 [build.environment]
