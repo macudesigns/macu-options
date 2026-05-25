@@ -24,71 +24,17 @@
         return u;
     }
 
-    function yahooUrl(symbol, crumb) {
-        const base = 'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(symbol) + '?range=1y&interval=1d';
-        return crumb ? base + '&crumb=' + encodeURIComponent(crumb) : base;
-    }
-
-    function yahooToCandle(data) {
-        try {
-            const result = data && data.chart && data.chart.result && data.chart.result[0];
-            if (!result) return { s: 'no_data' };
-            const rawClose = (result.indicators.quote[0].close)  || [];
-            const rawVol   = (result.indicators.quote[0].volume) || [];
-            const rawTs    = result.timestamp || [];
-            const closes = [], vols = [], ts = [];
-            for (let i = 0; i < rawClose.length; i++) {
-                if (rawClose[i] != null) {
-                    closes.push(rawClose[i]);
-                    vols.push(rawVol[i] || 0);
-                    ts.push(rawTs[i] || 0);
-                }
-            }
-            if (closes.length < 22) return { s: 'no_data' };
-            return { s: 'ok', c: closes, v: vols, t: ts };
-        } catch(e) { return { s: 'no_data' }; }
-    }
-
-    async function getYahooAuth() {
-        try {
-            const r1 = await fetch('https://finance.yahoo.com/', {
-                signal: AbortSignal.timeout(6000),
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                },
-            });
-            const rawCookie = r1.headers.get('set-cookie') || '';
-            const cookie = rawCookie.split(',').map(c => c.trim().split(';')[0]).join('; ');
-            const r2 = await fetch('https://query1.finance.yahoo.com/v1/test/getcrumb', {
-                signal: AbortSignal.timeout(6000),
-                headers: { 'User-Agent': 'Mozilla/5.0', 'Cookie': cookie },
-            });
-            const crumb = r2.ok ? (await r2.text()).trim() : '';
-            console.log('Yahoo auth: crumb=' + (crumb ? 'ok' : 'empty'));
-            return { cookie, crumb };
-        } catch(e) {
-            console.warn('getYahooAuth failed:', e.message);
-            return { cookie: '', crumb: '' };
-        }
-    }
 
     const SECTORS   = ['XLK','XLC','XLF','XLV','XLY','XLP','XLI','XLE','XLU','XLRE','XLB'];
     const WATCHLIST = ['AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','AVGO','AMD',
                        'JPM','BAC','WMT','XOM','LLY','GLD','USO','URA','GDX','PLTR','QQQ'];
-    const emptyObs    = { observations: [{ value: 'N/A', date: '-' }] };
-    const emptyObs0   = { observations: [] };
-    const todayStr    = new Date().toISOString().split('T')[0];
-    const to90Str     = new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0];
-    const to7Str      = new Date(Date.now() +  7 * 86400000).toISOString().split('T')[0];
+    const emptyObs  = { observations: [{ value: 'N/A', date: '-' }] };
+    const emptyObs0 = { observations: [] };
+    const todayStr  = new Date().toISOString().split('T')[0];
+    const to90Str   = new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0];
+    const to7Str    = new Date(Date.now() +  7 * 86400000).toISOString().split('T')[0];
 
-    // Fetch Yahoo auth first (sequential, ~500ms)
-    const yahooAuth = await getYahooAuth();
-    const yahooHeaders = yahooAuth.cookie ? { 'Cookie': yahooAuth.cookie } : {};
-
-    // ONE parallel phase: FRED + all candles + calendars
-    const allSymbols = ['SPY', ...SECTORS, ...WATCHLIST];
+    // ONE parallel phase: FRED + Finnhub metrics/quotes + calendars
     const allResults = await Promise.all([
         // FRED macro (11)
         safeFetch(fredUrl('UNRATE'),              emptyObs),
@@ -102,22 +48,28 @@
         safeFetch(fredUrl('T10Y2Y',       5),     emptyObs0),
         safeFetch(fredUrl('VIXCLS',       5),     emptyObs0),
         safeFetch(fredUrl('DTWEXBGS',     5),     emptyObs0),
+        // FRED SP500 daily series for SPY chart (1)
+        safeFetch(fredUrl('SP500', 200),          emptyObs0),
         // Finnhub calendars (2)
         safeFetch(finnBase + '/calendar/economic?from=' + todayStr + '&to=' + to90Str + '&token=' + FINNHUB_API_KEY, { economicCalendar: [] }),
         safeFetch(finnBase + '/calendar/earnings?from=' + todayStr + '&to=' + to7Str  + '&token=' + FINNHUB_API_KEY, { earningsCalendar: [] }),
-        // Candles via Yahoo Finance: SPY + 11 sectors + 20 watchlist (32)
-        ...allSymbols.map(sym => safeFetch(yahooUrl(sym, yahooAuth.crumb), { chart: { result: null } }, yahooHeaders)),
+        // Finnhub sector metrics (11) + sector quotes (11)
+        ...SECTORS.map(sym => safeFetch(finnBase + '/stock/metric?symbol=' + sym + '&metric=all&token=' + FINNHUB_API_KEY, {})),
+        ...SECTORS.map(sym => safeFetch(finnBase + '/quote?symbol=' + sym + '&token=' + FINNHUB_API_KEY, {})),
+        // Finnhub watchlist metrics (20) for volume flow
+        ...WATCHLIST.map(sym => safeFetch(finnBase + '/stock/metric?symbol=' + sym + '&metric=all&token=' + FINNHUB_API_KEY, {})),
     ]);
 
     const [unemployment, inflation, fedfunds,
            walcl, wtregen, rrp,
            nfci, hySpread, t10y2y, vixFred, dxy,
+           sp500Fred,
            finnhubEcoData, earningsRaw,
-           ...candleResults] = allResults;
+           ...marketResults] = allResults;
 
-    const spyCandle     = yahooToCandle(candleResults[0]);
-    const sectorCandles = candleResults.slice(1, 1 + SECTORS.length).map(yahooToCandle);
-    const watchCandles  = candleResults.slice(1 + SECTORS.length).map(yahooToCandle);
+    const sectorMetrics = marketResults.slice(0, SECTORS.length);
+    const sectorQuotes  = marketResults.slice(SECTORS.length, SECTORS.length * 2);
+    const watchMetrics  = marketResults.slice(SECTORS.length * 2);
 
     // Earnings enrichment (depends on earningsRaw — sequential but fast)
     const earningsList = (earningsRaw.earningsCalendar || []).slice(0, 15);
@@ -133,32 +85,6 @@
     });
     const finnhubEarningsData = { earningsCalendar: earningsList.map(e => ({ ...e, companyName: nameMap[e.symbol] || '' })) };
 
-    // ── Candle metric extractor ──────────────────────────────────────────
-    function computeMetrics(c) {
-        if (!c || c.s !== 'ok' || !c.c || c.c.length < 22) return null;
-        const cl = c.c, vl = c.v, n = cl.length;
-        const latest = cl[n - 1];
-        const d1m    = cl[n - 22];
-        const d3m    = n >= 64  ? cl[n - 64]  : null;
-        const d5     = n >= 6   ? cl[n - 6]   : null;
-        const sma50  = n >= 50  ? cl.slice(n - 50).reduce((a, b) => a + b, 0) / 50   : null;
-        const sma200 = n >= 200 ? cl.slice(n - 200).reduce((a, b) => a + b, 0) / 200 : null;
-        const vol5d  = vl.slice(n - 5).reduce((a, b) => a + b, 0) / 5;
-        const vol20d = vl.slice(n - 20).reduce((a, b) => a + b, 0) / 20;
-        const vol3d  = vl.slice(n - 3).reduce((a, b) => a + b, 0) / 3;
-        const vol30d = n >= 30 ? vl.slice(n - 30).reduce((a, b) => a + b, 0) / 30 : vol20d;
-        return {
-            latest,
-            perf1m:   ((latest - d1m) / d1m) * 100,
-            perf3m:   d3m  != null ? ((latest - d3m) / d3m) * 100 : null,
-            perf5d:   d5   != null ? ((latest - d5)  / d5)  * 100 : null,
-            dist50:   sma50  ? ((latest - sma50)  / sma50)  * 100 : null,
-            dist200:  sma200 ? ((latest - sma200) / sma200) * 100 : null,
-            volTrend: vol20d > 0 ? vol5d / vol20d : null,
-            volSpike: vol30d > 0 ? vol3d / vol30d : null,
-        };
-    }
-
     function pctRank(arr, val) {
         if (val == null) return 50;
         const sorted = arr.filter(v => v != null).sort((a, b) => a - b);
@@ -166,24 +92,35 @@
         return (sorted.filter(v => v < val).length / (sorted.length - 1)) * 100;
     }
 
-    // ── Score sectors ────────────────────────────────────────────────────
-    const spyM       = computeMetrics(spyCandle);
+    // ── Score sectors using Finnhub pre-computed metrics ─────────────────
     const rawSectors = SECTORS.map((sym, i) => {
-        const m = computeMetrics(sectorCandles[i]);
+        const m = (sectorMetrics[i] || {}).metric;
         if (!m) return null;
-        return { sym, ...m, relVsSpy3m: (m.perf3m != null && spyM && spyM.perf3m != null) ? m.perf3m - spyM.perf3m : null };
+        const perf1m     = m.monthToDatePriceReturnDaily           ?? null;
+        const perf3m     = m['13WeekPriceReturnDaily']              ?? null;
+        const perf5d     = m['5DayPriceReturnDaily']                ?? null;
+        const relVsSpy3m = m['priceRelativeToS&P50013Week']         ?? null;
+        const vol10d     = m['10DayAverageTradingVolume']           ?? null;
+        const vol3mo     = m['3MonthAverageTradingVolume']          ?? null;
+        const volTrend   = (vol3mo != null && vol3mo > 0) ? vol10d / vol3mo : null;
+        const latest     = (sectorQuotes[i] || {}).c               ?? null;
+        if (perf3m == null) return null;
+        return { sym, latest, perf1m, perf3m, perf5d, relVsSpy3m, volTrend };
     }).filter(Boolean);
 
     if (rawSectors.length > 0) {
-        const F = { relVsSpy3m: rawSectors.map(s => s.relVsSpy3m), perf1m: rawSectors.map(s => s.perf1m),
-                    perf3m: rawSectors.map(s => s.perf3m), perf5d: rawSectors.map(s => s.perf5d),
-                    volTrend: rawSectors.map(s => s.volTrend), volSpike: rawSectors.map(s => s.volSpike),
-                    dist50: rawSectors.map(s => s.dist50), dist200: rawSectors.map(s => s.dist200) };
+        const F = {
+            relVsSpy3m: rawSectors.map(s => s.relVsSpy3m),
+            perf1m:     rawSectors.map(s => s.perf1m),
+            perf3m:     rawSectors.map(s => s.perf3m),
+            perf5d:     rawSectors.map(s => s.perf5d),
+            volTrend:   rawSectors.map(s => s.volTrend),
+        };
         var scoredSectors = rawSectors.map(s => ({
             sym: s.sym, latest: s.latest, perf1m: s.perf1m, perf3m: s.perf3m,
             relVsSpy3m: s.relVsSpy3m, volTrend: s.volTrend,
-            rsScore:  Math.round(pctRank(F.relVsSpy3m, s.relVsSpy3m) * 0.35 + pctRank(F.perf1m, s.perf1m) * 0.25 + pctRank(F.volTrend, s.volTrend) * 0.20 + pctRank(F.dist50, s.dist50) * 0.10 + pctRank(F.dist200, s.dist200) * 0.10),
-            oppScore: Math.round((100 - pctRank(F.perf3m, s.perf3m)) * 0.40 + pctRank(F.volSpike, s.volSpike) * 0.30 + pctRank(F.perf5d, s.perf5d) * 0.30),
+            rsScore:  Math.round(pctRank(F.relVsSpy3m, s.relVsSpy3m) * 0.40 + pctRank(F.perf1m, s.perf1m) * 0.35 + pctRank(F.volTrend, s.volTrend) * 0.25),
+            oppScore: Math.round((100 - pctRank(F.perf3m, s.perf3m)) * 0.40 + pctRank(F.volTrend, s.volTrend) * 0.30 + pctRank(F.perf5d, s.perf5d) * 0.30),
         }));
     } else {
         var scoredSectors = [];
@@ -191,19 +128,19 @@
     const byRS  = [...scoredSectors].sort((a, b) => b.rsScore  - a.rsScore);
     const byOpp = [...scoredSectors].sort((a, b) => b.oppScore - a.oppScore);
 
-    // ── Volume flows ─────────────────────────────────────────────────────
+    // ── Volume flows using Finnhub pre-computed volume averages ──────────
     const flowAssets = WATCHLIST.map((sym, i) => {
-        const c = watchCandles[i];
-        if (!c || c.s !== 'ok' || !c.c || c.c.length < 21) return null;
-        const n = c.c.length, vl = c.v, cl = c.c;
-        const vol5d  = vl.slice(n - 5).reduce((a, b) => a + b, 0) / 5;
-        const vol20d = vl.slice(n - 20).reduce((a, b) => a + b, 0) / 20;
-        const ratio  = vol20d > 0 ? vol5d / vol20d : 1;
-        const chg    = cl.length >= 2 ? ((cl[n-1] - cl[n-2]) / cl[n-2]) * 100 : 0;
-        return { sym, volRatio: Math.round(ratio * 100) / 100, priceChg: Math.round(chg * 100) / 100, price: cl[n-1] };
+        const m = (watchMetrics[i] || {}).metric;
+        if (!m) return null;
+        const vol10d = m['10DayAverageTradingVolume']  ?? null;
+        const vol3mo = m['3MonthAverageTradingVolume'] ?? null;
+        if (vol10d == null || vol3mo == null || vol3mo === 0) return null;
+        const volRatio = Math.round((vol10d / vol3mo) * 100) / 100;
+        const priceChg = Math.round((m['5DayPriceReturnDaily'] ?? 0) * 100) / 100;
+        return { sym, volRatio, priceChg };
     }).filter(Boolean);
-    const flowingIn = flowAssets.filter(a => a.volRatio > 1.5 && a.priceChg > 0).sort((a, b) => b.volRatio - a.volRatio).slice(0, 8);
-    const dryingUp  = flowAssets.filter(a => a.volRatio < 0.6).sort((a, b) => a.volRatio - b.volRatio).slice(0, 8);
+    const flowingIn = flowAssets.filter(a => a.volRatio > 1.3 && a.priceChg > 0).sort((a, b) => b.volRatio - a.volRatio).slice(0, 8);
+    const dryingUp  = flowAssets.filter(a => a.volRatio < 0.7).sort((a, b) => a.volRatio - b.volRatio).slice(0, 8);
 
     // ── Net Liquidity (units: billions USD) ──────────────────────────────
     // WALCL = millions, WTREGEN = millions, RRPONTSYD = billions
@@ -224,9 +161,12 @@
         value: Math.round((w.val - forwardFill(tgaS, w.date) - forwardFill(rrpS, w.date)) * 10) / 10,
     }));
 
-    const spyForChart = spyCandle && spyCandle.s === 'ok'
-        ? spyCandle.t.map((t, i) => ({ date: new Date(t * 1000).toISOString().split('T')[0], value: spyCandle.c[i] })).slice(-120)
-        : [];
+    // SPY chart from FRED S&P 500 daily series
+    const spyForChart = (sp500Fred.observations || [])
+        .filter(o => o.value !== '.' && o.value !== 'N/A')
+        .map(o => ({ date: o.date, value: parseFloat(o.value) }))
+        .reverse()
+        .slice(-120);
 
     // ── Macro single values ───────────────────────────────────────────────
     function latestVal(obs) {
