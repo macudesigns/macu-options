@@ -1,14 +1,15 @@
-﻿const fetch = require('node-fetch');
-
-exports.handler = async function(event, context) {
+﻿exports.handler = async function(event, context) {
     const FRED_API_KEY    = process.env.FRED_API_KEY;
     const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
     const fredBase        = 'https://api.stlouisfed.org/fred/series/observations';
     const finnBase        = 'https://finnhub.io/api/v1';
 
-    async function safeFetch(url, fallback) {
+    async function safeFetch(url, fallback, extraHeaders = {}) {
         try {
-            const res = await fetch(url, { timeout: 8000 });
+            const res = await fetch(url, {
+                signal: AbortSignal.timeout(7000),
+                headers: { 'User-Agent': 'Mozilla/5.0', ...extraHeaders },
+            });
             if (!res.ok) { console.warn('safeFetch non-OK', res.status, url); return fallback; }
             return await res.json();
         } catch(e) {
@@ -23,10 +24,54 @@ exports.handler = async function(event, context) {
         return u;
     }
 
-    function finnhubCandle(symbol, days) {
-        const to   = Math.floor(Date.now() / 1000);
-        const from = to - (days || 220) * 86400;
-        return finnBase + '/stock/candle?symbol=' + symbol + '&resolution=D&from=' + from + '&to=' + to + '&token=' + FINNHUB_API_KEY;
+    function yahooUrl(symbol, crumb) {
+        const base = 'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(symbol) + '?range=1y&interval=1d';
+        return crumb ? base + '&crumb=' + encodeURIComponent(crumb) : base;
+    }
+
+    function yahooToCandle(data) {
+        try {
+            const result = data && data.chart && data.chart.result && data.chart.result[0];
+            if (!result) return { s: 'no_data' };
+            const rawClose = (result.indicators.quote[0].close)  || [];
+            const rawVol   = (result.indicators.quote[0].volume) || [];
+            const rawTs    = result.timestamp || [];
+            const closes = [], vols = [], ts = [];
+            for (let i = 0; i < rawClose.length; i++) {
+                if (rawClose[i] != null) {
+                    closes.push(rawClose[i]);
+                    vols.push(rawVol[i] || 0);
+                    ts.push(rawTs[i] || 0);
+                }
+            }
+            if (closes.length < 22) return { s: 'no_data' };
+            return { s: 'ok', c: closes, v: vols, t: ts };
+        } catch(e) { return { s: 'no_data' }; }
+    }
+
+    async function getYahooAuth() {
+        try {
+            const r1 = await fetch('https://finance.yahoo.com/', {
+                signal: AbortSignal.timeout(6000),
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                },
+            });
+            const rawCookie = r1.headers.get('set-cookie') || '';
+            const cookie = rawCookie.split(',').map(c => c.trim().split(';')[0]).join('; ');
+            const r2 = await fetch('https://query1.finance.yahoo.com/v1/test/getcrumb', {
+                signal: AbortSignal.timeout(6000),
+                headers: { 'User-Agent': 'Mozilla/5.0', 'Cookie': cookie },
+            });
+            const crumb = r2.ok ? (await r2.text()).trim() : '';
+            console.log('Yahoo auth: crumb=' + (crumb ? 'ok' : 'empty'));
+            return { cookie, crumb };
+        } catch(e) {
+            console.warn('getYahooAuth failed:', e.message);
+            return { cookie: '', crumb: '' };
+        }
     }
 
     const SECTORS   = ['XLK','XLC','XLF','XLV','XLY','XLP','XLI','XLE','XLU','XLRE','XLB'];
@@ -34,10 +79,13 @@ exports.handler = async function(event, context) {
                        'JPM','BAC','WMT','XOM','LLY','GLD','USO','URA','GDX','PLTR','QQQ'];
     const emptyObs    = { observations: [{ value: 'N/A', date: '-' }] };
     const emptyObs0   = { observations: [] };
-    const emptyCandle = { s: 'no_data' };
     const todayStr    = new Date().toISOString().split('T')[0];
     const to90Str     = new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0];
     const to7Str      = new Date(Date.now() +  7 * 86400000).toISOString().split('T')[0];
+
+    // Fetch Yahoo auth first (sequential, ~500ms)
+    const yahooAuth = await getYahooAuth();
+    const yahooHeaders = yahooAuth.cookie ? { 'Cookie': yahooAuth.cookie } : {};
 
     // ONE parallel phase: FRED + all candles + calendars
     const allSymbols = ['SPY', ...SECTORS, ...WATCHLIST];
@@ -57,8 +105,8 @@ exports.handler = async function(event, context) {
         // Finnhub calendars (2)
         safeFetch(finnBase + '/calendar/economic?from=' + todayStr + '&to=' + to90Str + '&token=' + FINNHUB_API_KEY, { economicCalendar: [] }),
         safeFetch(finnBase + '/calendar/earnings?from=' + todayStr + '&to=' + to7Str  + '&token=' + FINNHUB_API_KEY, { earningsCalendar: [] }),
-        // Candles: SPY + 11 sectors + 20 watchlist (32)
-        ...allSymbols.map(sym => safeFetch(finnhubCandle(sym), emptyCandle)),
+        // Candles via Yahoo Finance: SPY + 11 sectors + 20 watchlist (32)
+        ...allSymbols.map(sym => safeFetch(yahooUrl(sym, yahooAuth.crumb), { chart: { result: null } }, yahooHeaders)),
     ]);
 
     const [unemployment, inflation, fedfunds,
@@ -67,9 +115,9 @@ exports.handler = async function(event, context) {
            finnhubEcoData, earningsRaw,
            ...candleResults] = allResults;
 
-    const spyCandle     = candleResults[0];
-    const sectorCandles = candleResults.slice(1, 1 + SECTORS.length);
-    const watchCandles  = candleResults.slice(1 + SECTORS.length);
+    const spyCandle     = yahooToCandle(candleResults[0]);
+    const sectorCandles = candleResults.slice(1, 1 + SECTORS.length).map(yahooToCandle);
+    const watchCandles  = candleResults.slice(1 + SECTORS.length).map(yahooToCandle);
 
     // Earnings enrichment (depends on earningsRaw — sequential but fast)
     const earningsList = (earningsRaw.earningsCalendar || []).slice(0, 15);
