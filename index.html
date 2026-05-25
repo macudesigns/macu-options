@@ -261,7 +261,7 @@
                 <div class="flex flex-wrap items-center gap-2 mb-4 px-1">
                     <span class="text-lg">🇺🇸</span>
                     <span class="text-sm font-semibold text-gray-500">Consola de Ejecución — <strong class="text-gray-700">Mercado EE.UU.</strong></span>
-                    <div class="ml-auto flex items-center gap-2 flex-shrink-0">
+                    <div class="ml-auto flex items-center gap-2 shrink-0">
                         <button id="learn-mode-btn" onclick="toggleLearningMode()" class="flex items-center gap-1.5 py-1.5 px-3 rounded-lg border text-xs font-semibold transition-colors border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100">🎓 Modo Aprendizaje: OFF</button>
                         <span id="market-last-updated" class="text-xs text-gray-400"></span>
                         <button onclick="refreshMarketData()" id="market-refresh-btn" class="flex items-center gap-1 py-1.5 px-3 rounded-lg border border-gray-200 text-xs font-semibold text-gray-500 hover:bg-gray-50 transition-colors">↺ Actualizar</button>
@@ -370,13 +370,20 @@
                 <!-- ── Calendars ── -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
                     <div class="card">
-                        <h2 class="text-base font-bold text-gray-900 mb-3">🏦 Próxima Reunión FOMC</h2>
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-base font-bold text-gray-900">🏦 Próxima Reunión FOMC</h2>
+                            <span id="market-status-badge" class="text-xs font-semibold px-3 py-1.5 rounded-xl border">...</span>
+                        </div>
                         <p id="fomc-date" class="text-3xl font-bold text-indigo-600">—</p>
                         <p class="text-xs text-gray-400 mt-1">Decisión sobre tasas de interés</p>
                     </div>
                     <div class="card">
-                        <h2 class="text-base font-bold text-gray-900 mb-3">📅 Earnings Próximos (7 días)</h2>
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-base font-bold text-gray-900">📅 Earnings Próximos (7 días)</h2>
+                            <span class="text-xs text-gray-400">⭐ hasta 10 favoritos</span>
+                        </div>
                         <div id="earnings-calendar" class="space-y-2"><p class="text-center text-gray-400 text-sm py-4">Cargando datos...</p></div>
+                        <p id="earnings-fav-bar" class="text-xs text-amber-600 mt-2 hidden"></p>
                         <p class="text-xs text-gray-400 mt-3 text-center">Fuente: Finnhub</p>
                     </div>
                 </div>
@@ -561,31 +568,31 @@
                             </div>
                         </div>
                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check shrink-0">
                             <span>¿Hay <strong>ruptura o rompimiento</strong> de la línea de tendencia?</span>
                         </label>
                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check shrink-0">
                             <span>He confirmado la tendencia en el <strong>gráfico semanal (1W)</strong></span>
                         </label>
                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check shrink-0">
                             <span>He confirmado la tendencia en el <strong>gráfico diario (1D)</strong></span>
                         </label>
                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check shrink-0">
                             <span>He confirmado el contexto en el <strong>gráfico de 1 hora (1H)</strong></span>
                         </label>
                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check shrink-0">
                             <span>He marcado niveles clave de <strong>soporte y resistencia</strong></span>
                         </label>
                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check shrink-0">
                             <span>He marcado puntos de rebote en relación a las <strong>Medias Móviles (MA20, MA40, MA100, MA200)</strong></span>
                         </label>
                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check shrink-0">
                             <span>He verificado las <strong>Bandas de Bollinger</strong> (banda inferior, superior o punto medio)</span>
                         </label>
                     </div>
@@ -599,23 +606,23 @@
                     </h4>
                     <div class="space-y-2">
                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-emerald-50 cursor-pointer text-sm border border-emerald-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check shrink-0">
                             <span>La <strong>entrada está basada en el gráfico de 15 minutos (15M)</strong> ✅</span>
                         </label>
                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check shrink-0">
                             <span>El <strong>spread Bid/Ask es aceptable</strong> para operar (no demasiado amplio)</span>
                         </label>
                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check shrink-0">
                             <span>El <strong>precio de compra está dentro del rango óptimo</strong> definido en el Análisis</span>
                         </label>
                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 cursor-pointer text-sm border border-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check shrink-0">
                             <span>La <strong>fecha de expiración es el próximo viernes</strong> (la más cercana)</span>
                         </label>
                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-amber-50 cursor-pointer text-sm border border-amber-100 transition-colors">
-                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check flex-shrink-0">
+                            <input type="checkbox" class="mt-0.5 h-4 w-4 text-indigo-600 rounded pretrade-check shrink-0">
                             <span>No hay <strong>reporte de ganancias (Earnings)</strong> ni noticias de alto impacto que afecten al activo esta semana</span>
                         </label>
                     </div>
@@ -1528,26 +1535,75 @@
             ? new Date(nextFomc.time).toLocaleDateString('es-ES', { day:'numeric', month:'short', year:'numeric' })
             : 'Por confirmar';
 
-        var earningsEl = document.getElementById('earnings-calendar');
-        var earnings   = ((data.finnhubEarningsData && data.finnhubEarningsData.earningsCalendar) || []).slice(0, 15);
-        earningsEl.innerHTML = earnings.length > 0
-            ? earnings.map(function(e) {
-                var name = e.companyName ? esc(e.companyName) : '';
-                return '<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg gap-2">' +
-                    '<div class="flex items-center gap-3 min-w-0">' +
-                        '<span class="font-bold text-indigo-600 font-mono text-sm flex-shrink-0 w-14">' + esc(e.symbol) + '</span>' +
-                        '<div class="min-w-0">' +
-                            (name ? '<p class="text-sm font-medium text-gray-700 truncate">' + name + '</p>' : '') +
-                            '<p class="text-xs text-gray-400">' + e.date + '</p>' +
+        // ── Market status badge ───────────────────────────────────────────
+        (function() {
+            function getMarketStatus() {
+                var etStr = new Date().toLocaleString('en-US', { timeZone: 'America/New_York' });
+                var et = new Date(etStr);
+                var day = et.getDay(), h = et.getHours(), m2 = et.getMinutes(), mins = h * 60 + m2;
+                if (day === 0 || day === 6) return { label: 'Cerrado (fin de semana)', cls: 'bg-gray-100 text-gray-500 border-gray-200' };
+                if (mins >= 570 && mins < 960)  return { label: '🟢 Mercado abierto',   cls: 'bg-green-100 text-green-700 border-green-200' };
+                if (mins >= 240 && mins < 570)  return { label: '🟡 Pre-mercado',        cls: 'bg-amber-100 text-amber-700 border-amber-200' };
+                if (mins >= 960 && mins < 1200) return { label: '🟡 Post-mercado',       cls: 'bg-amber-100 text-amber-700 border-amber-200' };
+                return { label: '🔴 Mercado cerrado', cls: 'bg-red-50 text-red-600 border-red-200' };
+            }
+            var badge = document.getElementById('market-status-badge');
+            if (badge) {
+                var s = getMarketStatus();
+                badge.textContent = s.label;
+                badge.className = 'text-xs font-semibold px-3 py-1.5 rounded-xl border ' + s.cls;
+            }
+        })();
+
+        // ── Earnings with favorites ───────────────────────────────────────
+        var FAV_KEY = 'macu_earnings_fav';
+        function getFavs() { try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); } catch(e) { return []; } }
+        function saveFavs(arr) { localStorage.setItem(FAV_KEY, JSON.stringify(arr)); }
+        window.toggleEarningsFav = function(sym) {
+            var favs = getFavs();
+            var idx = favs.indexOf(sym);
+            if (idx >= 0) { favs.splice(idx, 1); }
+            else if (favs.length < 10) { favs.push(sym); }
+            saveFavs(favs);
+            renderEarnings();
+        };
+        function renderEarnings() {
+            var favs = getFavs();
+            var earningsEl = document.getElementById('earnings-calendar');
+            var allEarnings = ((data.finnhubEarningsData && data.finnhubEarningsData.earningsCalendar) || []).slice(0, 15);
+            var sorted = allEarnings.slice().sort(function(a, b) {
+                return (favs.indexOf(b.symbol) >= 0 ? 1 : 0) - (favs.indexOf(a.symbol) >= 0 ? 1 : 0);
+            });
+            earningsEl.innerHTML = sorted.length > 0
+                ? sorted.map(function(e) {
+                    var name = e.companyName ? esc(e.companyName) : '';
+                    var isFav = favs.indexOf(e.symbol) >= 0;
+                    var canAdd = favs.length < 10;
+                    var starTitle = isFav ? 'Quitar favorito' : canAdd ? 'Añadir a favoritos' : 'Máximo 10 favoritos';
+                    var starCls = isFav ? 'text-amber-400' : (canAdd ? 'text-gray-200 hover:text-amber-300 cursor-pointer' : 'text-gray-100');
+                    return '<div class="flex items-center gap-2 p-3 rounded-lg gap-2 ' + (isFav ? 'bg-amber-50' : 'bg-gray-50') + '">' +
+                        '<button onclick="toggleEarningsFav(\'' + esc(e.symbol) + '\')" title="' + starTitle + '" class="text-lg leading-none shrink-0 ' + starCls + '" ' + (!isFav && !canAdd ? 'disabled' : '') + '>★</button>' +
+                        '<div class="flex items-center gap-3 min-w-0 flex-1">' +
+                            '<span class="font-bold ' + (isFav ? 'text-amber-700' : 'text-indigo-600') + ' font-mono text-sm shrink-0 w-14">' + esc(e.symbol) + '</span>' +
+                            '<div class="min-w-0">' +
+                                (name ? '<p class="text-sm font-medium text-gray-700 truncate">' + name + '</p>' : '') +
+                                '<p class="text-xs text-gray-400">' + e.date + '</p>' +
+                            '</div>' +
                         '</div>' +
-                    '</div>' +
-                    '<div class="text-xs text-gray-500 flex-shrink-0 text-right">' +
-                        '<span>EPS Est: <strong>' + (e.epsEstimate != null ? e.epsEstimate : 'N/A') + '</strong></span>' +
-                        (e.epsActual != null ? '<br><span class="text-emerald-600">Real: <strong>' + e.epsActual + '</strong></span>' : '') +
-                    '</div>' +
-                '</div>';
-            }).join('')
-            : '<p class="text-center text-gray-400 py-8 text-sm">No hay reportes próximos.</p>';
+                        '<div class="text-xs text-gray-500 shrink-0 text-right">' +
+                            '<span>EPS Est: <strong>' + (e.epsEstimate != null ? e.epsEstimate : 'N/A') + '</strong></span>' +
+                            (e.epsActual != null ? '<br><span class="text-emerald-600">Real: <strong>' + e.epsActual + '</strong></span>' : '') +
+                        '</div>' +
+                    '</div>';
+                }).join('')
+                : '<p class="text-center text-gray-400 py-8 text-sm">No hay reportes próximos.</p>';
+            var favBar = document.getElementById('earnings-fav-bar');
+            if (favBar) {
+                if (favs.length > 0) { favBar.textContent = '★ ' + favs.length + '/10 favoritos: ' + favs.join(', '); favBar.classList.remove('hidden'); }
+                else { favBar.classList.add('hidden'); }
+            }
+        }
+        renderEarnings();
 
         var today = new Date().toISOString().split('T')[0];
         marketFedToday      = cal.some(function(e){ return e.event.includes('FOMC') && e.time.startsWith(today); });
@@ -2131,3 +2187,4 @@
     </script>
 </body>
 </html>
+
